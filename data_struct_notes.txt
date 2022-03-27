@@ -1,0 +1,278 @@
+Prelude Text.XML M> root
+Element 
+    {
+    elementName = Name 
+        {
+        nameLocalName = "document", 
+        nameNamespace = Nothing, 
+        namePrefix = Nothing}, 
+
+    elementAttributes = fromList 
+            [
+                (Name {
+                    nameLocalName = "title", 
+                    nameNamespace = Nothing, 
+                    namePrefix = Nothing},
+                "My Title")
+            ], 
+
+    elementNodes = [
+            NodeContent "\n    ",
+            NodeElement (Element 
+                {elementName = Name {
+                    nameLocalName = "para", nameNamespace = Nothing, namePrefix = Nothing}, 
+                    elementAttributes = fromList [], 
+                    elementNodes = [NodeContent "This is a paragraph. It has ",
+                    NodeElement (Element {
+                        elementName = Name {
+                            nameLocalName = "em", nameNamespace = Nothing, namePrefix = Nothing
+                            }, 
+                        elementAttributes = fromList [], elementNodes = [NodeContent "emphasized"]
+                        }),
+                        NodeContent " and ",NodeElement (Element {elementName = Name {
+                            nameLocalName = "strong", nameNamespace = Nothing, namePrefix = Nothing
+                            }, elementAttributes = fromList [], elementNodes = [NodeContent "strong"]
+                            }),NodeContent " words."]}),NodeContent "\n    ",NodeElement (Element {elementName = Name {
+                                nameLocalName = "image", nameNamespace = Nothing, namePrefix = Nothing}, 
+                                elementAttributes = fromList [(Name {nameLocalName = "href", 
+                                nameNamespace = Nothing, namePrefix = Nothing},"myimage.png")], elementNodes = []}),NodeContent "\n"]
+                                
+    }
+
+----------------------------------------------------------
+prologue
+Prologue {
+    prologueBefore = [MiscComment " Input XML file "], 
+    prologueDoctype = Nothing, 
+    prologueAfter = []
+    }
+
+
+----------------------------------------------------------
+Document prologue root epilogue <- Text.XML.readFile def "route_example_1.gpx"
+root
+Element {
+    elementName = Name {
+        nameLocalName = "gpx", 
+        nameNamespace = Just "http://www.topografix.com/GPX/1/1", 
+        namePrefix = Nothing
+    }, 
+    elementAttributes = fromList [
+        (Name {
+            nameLocalName = "creator", 
+            nameNamespace = Nothing, 
+            namePrefix = Nothing
+        },
+        "Apple Health Export"
+        ),
+        (Name {
+            nameLocalName = "version", 
+            nameNamespace = Nothing, 
+            namePrefix = Nothing
+        },
+        "1.1"
+        ),
+        (Name {
+            nameLocalName = "schemaLocation", 
+            nameNamespace = Just "http://www.w3.org/2001/XMLSchema-instance", 
+            namePrefix = Just "xsi"
+        },
+        "http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd"
+        )
+    ], 
+    elementNodes = [
+        NodeContent "\n  ",
+        NodeElement (Element {
+            elementName = Name {
+                nameLocalName = "metadata", 
+                nameNamespace = Just "http://www.topografix.com/GPX/1/1", 
+                namePrefix = Nothing
+                }, 
+            elementAttributes = fromList [], 
+            elementNodes = [
+                NodeContent "\n    ",
+                NodeElement (Element {
+                    elementName = Name {
+                        nameLocalName = "time", 
+                        nameNamespace = Just "http://www.topografix.com/GPX/1/1", 
+                        namePrefix = Nothing
+                        }, 
+                    elementAttributes = fromList [], 
+                    elementNodes = [
+                        NodeContent "2021-11-14T02:00:06Z"
+                        ]
+                    }),
+                NodeContent "\n  "
+                ]
+            }
+        ),
+        NodeContent "\n  ",
+        NodeElement (Element {
+            elementName = Name {
+                nameLocalName = "trk", 
+                nameNamespace = Just "http://www.topografix.com/GPX/1/1", 
+                namePrefix = Nothing
+            }, 
+            elementAttributes = fromList [], 
+            elementNodes = [
+                NodeContent "\n    ",
+                NodeElement (Element {
+                    elementName = Name {
+                        nameLocalName = "name", 
+                        nameNamespace = Just "http://www.topografix.com/GPX/1/1", 
+                        namePrefix = Nothing
+                    }, 
+                    elementAttributes = fromList [], 
+                    elementNodes = [
+                        NodeContent "Route 2020-07-09 6:10pm"
+                    ]
+                }),
+                NodeContent "\n    ",
+                NodeElement (Element {
+                    elementName = Name {
+                        nameLocalName = "trkseg", 
+                        nameNamespace = Just "http://www.topografix.com/GPX/1/1", 
+                        namePrefix = Nothing
+                    }, 
+                    elementAttributes = fromList [], 
+                    elementNodes = [
+                        NodeContent "\n      ",
+                        NodeElement (Element {
+                            elementName = Name {
+                                nameLocalName = "trkpt", 
+                                nameNamespace = Just "http://www.topografix.com/GPX/1/1", 
+                                namePrefix = Nothing
+                            }, 
+                            elementAttributes = fromList [
+                                (Name {
+                                    nameLocalName = "lat", 
+                                    nameNamespace = Nothing, 
+                                    namePrefix = Nothing
+                                },
+                                "43.699496"),
+                                (Name {
+                                    nameLocalName = "lon", 
+                                    nameNamespace = Nothing, 
+                                    namePrefix = Nothing
+                                },
+                                "-79.387199")
+                            ], 
+                            elementNodes = [
+                                NodeElement (Element {
+                                    elementName = Name {
+                                        nameLocalName = "ele", 
+                                        nameNamespace = Just "http://www.topografix.com/GPX/1/1", 
+                                        namePrefix = Nothing
+                                    }, 
+                                    elementAttributes = fromList [], 
+                                    elementNodes = [NodeContent "152.416275"]
+                                }),
+                                NodeElement (Element {
+                                    elementName = Name {
+                                        nameLocalName = "time", 
+                                        nameNamespace = Just "http://www.topografix.com/GPX/1/1", 
+                                        namePrefix = Nothing
+                                    }, 
+                                    elementAttributes = fromList [], 
+                                    elementNodes = [NodeContent "2020-07-09T21:32:50Z"]
+                                }),
+                                NodeElement (Element {
+                                    elementName = Name {
+                                        nameLocalName = "extensions", 
+                                        nameNamespace = Just "http://www.topografix.com/GPX/1/1", 
+                                        namePrefix = Nothing
+                                    }, 
+                                    elementAttributes = fromList [], 
+                                    elementNodes = [
+                                        NodeElement (Element {
+                                            elementName = Name {
+                                                nameLocalName = "speed", 
+                                                nameNamespace = Just "http://www.topografix.com/GPX/1/1", 
+                                                namePrefix = Nothing
+                                            }, 
+                                            elementAttributes = fromList [], 
+                                            elementNodes = [NodeContent "2.667312"]
+                                        }),
+                                        NodeElement (Element {
+                                            elementName = Name {
+                                                nameLocalName = "course", 
+                                                nameNamespace = Just "http://www.topografix.com/GPX/1/1", 
+                                                namePrefix = Nothing
+                                            }, 
+                                            elementAttributes = fromList [], 
+                                            elementNodes = [NodeContent "-1.000000"]
+                                        }),
+                                        NodeElement (Element {
+                                            elementName = Name {
+                                                nameLocalName = "hAcc", 
+                                                nameNamespace = Just "http://www.topografix.com/GPX/1/1", 
+                                                namePrefix = Nothing
+                                            }, 
+                                            elementAttributes = fromList [], 
+                                            elementNodes = [NodeContent "4.469490"]
+                                        }),
+                                        NodeElement (Element {
+                                            elementName = Name {
+                                                nameLocalName = "vAcc", 
+                                                nameNamespace = Just "http://www.topografix.com/GPX/1/1", 
+                                                namePrefix = Nothing
+                                            }, 
+                                            elementAttributes = fromList [], 
+                                            elementNodes = [NodeContent "3.048104"]
+                                        })
+                                    ]
+                                })
+                            ]
+                        }),
+                        NodeContent "\n    "]
+                }),
+                NodeContent "\n  "]
+            }),
+            NodeContent "\n"
+    ]}
+
+----------------------------------------------------------
+<?xml version="1.0" encoding="UTF-8"?>
+<html>
+    <head>
+        <title>
+            Untitled Document
+        </title>
+    </head>
+    <body>
+        <metadata xmlns="http://www.topografix.com/GPX/1/1">
+            <time>
+                2021-11-14T02:00:06Z
+            </time>
+        </metadata>
+        <trk xmlns="http://www.topografix.com/GPX/1/1">
+            <name>
+                Route 2020-07-09 6:10pm
+            </name>
+            <trkseg>
+                <trkpt lat="43.699496" lon="-79.387199">
+                    <ele>
+                        152.416275
+                    </ele>
+                    <time>
+                        2020-07-09T21:32:50Z
+                    </time>
+                    <extensions>
+                        <speed>
+                            2.667312
+                        </speed>
+                        <course>
+                            -1.000000
+                        </course>
+                        <hAcc>
+                            4.469490
+                        </hAcc>
+                        <vAcc>
+                            3.048104
+                        </vAcc>
+                    </extensions>
+                </trkpt>
+            </trkseg>
+        </trk>
+    </body>
+</html>

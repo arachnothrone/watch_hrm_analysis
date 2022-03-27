@@ -3,19 +3,6 @@
 
 module Main where
 
--- import HaskellSay (haskellSay)
--- import Text.XML
--- import qualified Data.Map        as M
--- import           Prelude         hiding (readFile, writeFile)
--- import           Text.Hamlet.XML
-
-
--- main :: IO ()
--- -- main = putStrLn "Hello, Haskell!"
--- main =  haskellSay "Hello, Haskell! You're using a function from another package!"
-
-
-
 import qualified Data.Map        as M
 import           Prelude         hiding (readFile, writeFile)
 import           Text.Hamlet.XML
@@ -24,8 +11,7 @@ import           Text.XML
 main :: IO ()
 main = do
     -- readFile will throw any parse errors as runtime exceptions
-    -- def uses the default settings
-    Document prologue root epilogue <- readFile def "input.xml"
+    Document prologue root epilogue <- readFile def "src_data/route_example_1.gpx"
 
     -- root is the root element of the document, let's modify it
     let root' = transform root
