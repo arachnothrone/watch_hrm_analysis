@@ -7,6 +7,8 @@ import qualified Data.Map        as M
 import           Prelude         hiding (readFile, writeFile)
 import           Text.Hamlet.XML
 import           Text.XML
+import           Data.Text
+import Data.Foldable
 
 main :: IO ()
 main = do
@@ -58,51 +60,59 @@ goNode (NodeInstruction _) = [] -- and hide processing instructions too
 goElem :: Element -> Element
 -- goElem :: Element -> (Element, [String])
 goElem (Element (Name elmName _ _) attrs children)
-    | elmName == "sdf" = Element "--------------> aaa" attrs $ concatMap goNode children
-    | elmName == "xxx" = Element "--------------> xxx" attrs $ concatMap goNode children
-goElem (Element "metadata" attrs children) = 
-    Element "--------------> metadata" attrs $ concatMap goNode children
-goElem (Element "time" attrs children) = 
-    Element "--------------> time" attrs $ concatMap goNode children
-goElem (Element "trk" attrs children) = 
-    Element "--------------> trk" attrs $ concatMap goNode children
-goElem (Element "name" attrs children) = 
-    Element "--------------> name" attrs $ concatMap goNode children
-goElem (Element "trkseg" attrs children) = 
-    Element "--------------> trkseg" attrs $ concatMap goNode children
-goElem (Element "trkpt" attrs children) = 
-    Element "--------------> trkpt" attrs $ concatMap goNode children
-goElem (Element "ele" attrs children) = 
-    Element "--------------> ele" attrs $ concatMap goNode children
-goElem (Element "extensions" attrs children) = 
-    Element "--------------> extensions" attrs $ concatMap goNode children
-goElem (Element "vAcc" attrs children) = 
-    Element "--------------> vAcc" attrs $ concatMap goNode children
-goElem (Element "speed" attrs children) = 
-    Element "--------------> speed" attrs $ concatMap goNode children
-goElem (Element "course" attrs children) = 
-    Element "--------------> course" attrs $ concatMap goNode children
-goElem (Element "hAcc" attrs children) = 
-    Element "--------------> hAcc" attrs $ concatMap goNode children
-goElem (Element "lon" attrs children) = 
-    Element "--------------> lon" attrs $ concatMap goNode children
-goElem (Element "lat" attrs children) = 
-    Element "--------------> lat" attrs $ concatMap goNode children
--- goElem (Element "para" attrs children) =
---     Element "p" attrs $ concatMap goNode children
--- goElem (Element "em" attrs children) =
---     Element "i" attrs $ concatMap goNode children
--- goElem (Element "strong" attrs children) =
---     Element "b" attrs $ concatMap goNode children
--- goElem (Element "image" attrs _children) =
---     Element "img" (fixAttr attrs) [] -- images can't have children
---   where
---     fixAttr mattrs
---         | "href" `M.member` mattrs  = M.delete "href" $ M.insert "src" (mattrs M.! "href") mattrs
---         | otherwise                 = mattrs
-goElem (Element name attrs children) =
-    -- don't know what to do, just pass it through...
-    Element name attrs $ concatMap goNode children
+    | elmName == pack "metadata" = Element "--------------> metadata" attrs $ Data.Foldable.concatMap goNode children
+    | elmName == pack "time" = Element "--------------> time" attrs $ Data.Foldable.concatMap goNode children
+    | otherwise = let n = (unpack elmName ++ ": -----------> 000") in 
+        Element 
+            Name {
+                nameLocalName = pack n, 
+                nameNamespace = Nothing, 
+                namePrefix = Nothing
+            }
+            attrs $ Data.Foldable.concatMap goNode children
+-- goElem (Element "metadata" attrs children) = 
+--     Element "--------------> metadata" attrs $ concatMap goNode children
+-- goElem (Element "time" attrs children) = 
+--     Element "--------------> time" attrs $ concatMap goNode children
+-- goElem (Element "trk" attrs children) = 
+--     Element "--------------> trk" attrs $ concatMap goNode children
+-- goElem (Element "name" attrs children) = 
+--     Element "--------------> name" attrs $ concatMap goNode children
+-- goElem (Element "trkseg" attrs children) = 
+--     Element "--------------> trkseg" attrs $ concatMap goNode children
+-- goElem (Element "trkpt" attrs children) = 
+--     Element "--------------> trkpt" attrs $ concatMap goNode children
+-- goElem (Element "ele" attrs children) = 
+--     Element "--------------> ele" attrs $ concatMap goNode children
+-- goElem (Element "extensions" attrs children) = 
+--     Element "--------------> extensions" attrs $ concatMap goNode children
+-- goElem (Element "vAcc" attrs children) = 
+--     Element "--------------> vAcc" attrs $ concatMap goNode children
+-- goElem (Element "speed" attrs children) = 
+--     Element "--------------> speed" attrs $ concatMap goNode children
+-- goElem (Element "course" attrs children) = 
+--     Element "--------------> course" attrs $ concatMap goNode children
+-- goElem (Element "hAcc" attrs children) = 
+--     Element "--------------> hAcc" attrs $ concatMap goNode children
+-- goElem (Element "lon" attrs children) = 
+--     Element "--------------> lon" attrs $ concatMap goNode children
+-- goElem (Element "lat" attrs children) = 
+--     Element "--------------> lat" attrs $ concatMap goNode children
+-- -- goElem (Element "para" attrs children) =
+-- --     Element "p" attrs $ concatMap goNode children
+-- -- goElem (Element "em" attrs children) =
+-- --     Element "i" attrs $ concatMap goNode children
+-- -- goElem (Element "strong" attrs children) =
+-- --     Element "b" attrs $ concatMap goNode children
+-- -- goElem (Element "image" attrs _children) =
+-- --     Element "img" (fixAttr attrs) [] -- images can't have children
+-- --   where
+-- --     fixAttr mattrs
+-- --         | "href" `M.member` mattrs  = M.delete "href" $ M.insert "src" (mattrs M.! "href") mattrs
+-- --         | otherwise                 = mattrs
+-- goElem (Element name attrs children) =
+--     -- don't know what to do, just pass it through...
+--     Element name attrs $ concatMap goNode children
 
--- goElem (Element name attrs children) = 
---     Element "sdf" attrs []
+-- -- goElem (Element name attrs children) = 
+-- --     Element "sdf" attrs []
