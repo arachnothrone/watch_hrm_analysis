@@ -16,6 +16,7 @@ main = do
     -- -- root is the root element of the document, let's modify it
     -- let root' = transform root
     let rootListTups = getElevations root
+
     putStrLn "theend"
 
     
@@ -56,6 +57,9 @@ goNode (NodeInstruction _) = [] -- and hide processing instructions too
 -- convert each source element to its XHTML equivalent
 goElem :: Element -> Element
 -- goElem :: Element -> (Element, [String])
+goElem (Element (Name elmName _ _) attrs children)
+    | elmName == "sdf" = Element "--------------> aaa" attrs $ concatMap goNode children
+    | elmName == "xxx" = Element "--------------> xxx" attrs $ concatMap goNode children
 goElem (Element "metadata" attrs children) = 
     Element "--------------> metadata" attrs $ concatMap goNode children
 goElem (Element "time" attrs children) = 
