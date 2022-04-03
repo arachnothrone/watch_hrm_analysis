@@ -62,14 +62,16 @@ goElem :: Element -> Element
 goElem (Element (Name elmName _ _) attrs children)
     | elmName == pack "metadata" = Element "--------------> metadata" attrs $ Data.Foldable.concatMap goNode children
     | elmName == pack "time" = Element "--------------> time" attrs $ Data.Foldable.concatMap goNode children
-    | otherwise = let n = (unpack elmName ++ ": -----------> 000") in 
-        Element 
-            Name {
-                nameLocalName = pack n, 
-                nameNamespace = Nothing, 
-                namePrefix = Nothing
-            }
-            attrs $ Data.Foldable.concatMap goNode children
+    -- | otherwise = let n = (unpack elmName ++ ": -----------> 000") in 
+    --     Element 
+    --         Name {
+    --             nameLocalName = pack n, 
+    --             nameNamespace = Nothing, 
+    --             namePrefix = Nothing
+    --         }
+    --         attrs $ Data.Foldable.concatMap goNode children
+    | otherwise = let n = (unpack elmName ++ ": -----------> 000") in
+        Element (Name {pack n Nothing Nothing) attrs $ Data.Foldable.concatMap goNode children
 -- goElem (Element "metadata" attrs children) = 
 --     Element "--------------> metadata" attrs $ concatMap goNode children
 -- goElem (Element "time" attrs children) = 
