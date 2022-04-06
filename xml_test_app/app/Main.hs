@@ -61,8 +61,14 @@ goNode (NodeInstruction _) = [] -- and hide processing instructions too
 goElem :: Element -> Element
 -- goElem :: Element -> (Element, [String])
 goElem (Element (Name elmName _ _) attrs children)
-    | elmName == pack "metadata" = Element "--------------> metadata" attrs $ Data.Foldable.concatMap goNode children
-    | elmName == pack "time" = Element "--------------> time" attrs $ Data.Foldable.concatMap goNode children
+    | elmName == pack "trk" = Element "--------------> trk" attrs $ Data.Foldable.concatMap goNode children -- trkseg
+    | elmName == pack "trkseg" = Element "--------------> trkseg" attrs $ Data.Foldable.concatMap goNode children -- trkpt
+    | elmName == pack "trkpt" = Element "--------------> trkpt" attrs $ Data.Foldable.concatMap goNode children -- trkpt
+    | elmName == pack "time" = Element "--------------> time" attrs $ Data.Foldable.concatMap goNode children -- extensions
+    | elmName == pack "extensions" = Element "--------------> extensions" attrs $ Data.Foldable.concatMap goNode children -- extensions
+    | elmName == pack "speed" = Element "--------------> speed" attrs $ Data.Foldable.concatMap goNode children
+    | elmName == pack "hAcc" = Element "--------------> hAcc" attrs $ Data.Foldable.concatMap goNode children
+    | elmName == pack "vAcc" = Element "--------------> vAcc" attrs $ Data.Foldable.concatMap goNode children
     -- | otherwise = let n = (unpack elmName ++ ": -----------> 000") in 
     --     Element 
     --         Name {
