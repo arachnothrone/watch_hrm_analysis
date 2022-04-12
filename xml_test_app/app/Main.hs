@@ -10,6 +10,9 @@ import           Text.XML
 import           Data.Text
 import Data.Foldable
 
+-- import qualified Data.Map.Strict as Map
+-- import Data.Map (Map())
+
 main :: IO ()
 main = do
     -- readFile will throw any parse errors as runtime exceptions
@@ -50,6 +53,9 @@ getElevations (Element name attribs children) = [goNode child | child <- childre
 
 -- elmTpl :: (Element, [String]) -> Element
 -- elmTpl (a, _) = a 
+
+getElevations2 :: Element -> [String]
+getElevations2 e = []
 
 goNode :: Node -> [Node]
 goNode (NodeElement e) = [NodeElement $ goElem e]
@@ -97,3 +103,7 @@ goElem (Element (Name elmName _ _) attrs children)
 
 -- -- goElem (Element name attrs children) = 
 -- --     Element "sdf" attrs []
+
+-- map with ints as keys and strings as values
+myMap :: M.Map Int String
+myMap = M.fromList [(5,"a"), (3,"b"), (5, "c")]
