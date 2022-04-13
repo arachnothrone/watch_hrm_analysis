@@ -54,7 +54,7 @@ getElevations (Element name attribs children) = [goNode child | child <- childre
 -- elmTpl :: (Element, [String]) -> Element
 -- elmTpl (a, _) = a 
 
-getElevations2 :: Element -> [String]
+getElevations2 :: Element -> [(String, String)]
 getElevations2 e = []
 
 goNode :: Node -> [Node]
@@ -63,15 +63,36 @@ goNode (NodeContent t) = [NodeContent t]
 goNode (NodeComment _) = [] -- hide comments
 goNode (NodeInstruction _) = [] -- and hide processing instructions too
 
+-- goNode' :: Node -> [(String, String)] -> ([Node], [(String, String)])
+goNode' :: Node -> [Node]
+goNode' (NodeElement e) = [NodeElement $ fst (goElem' e [])]
+goNode' (NodeContent t) = [NodeContent t]
+goNode' (NodeComment _) = [] -- hide comments
+goNode' (NodeInstruction _) = [] -- and hide processing instructions too
+
+
+goElem' :: Element -> [(String, String)] -> (Element, [(String, String)])
+goElem' (Element (Name elmName n2 n3) attrs children) xs 
+    | elmName == pack "speed" = (
+        Element "--------------> speed" attrs $ Data.Foldable.concatMap goNode children, 
+        ("speed", getNodeContent children):xs)
+    --   | otherwise = (Element (Name elmName n2 n3) attrs children, xs)
+    | otherwise = (Element "" (M.fromList []) [], xs)
+
+getNodeContent :: [Node] -> String
+getNodeContent (x:xs) = unpack $ getN x 
+    where 
+        getN (NodeContent c) = c 
+
 -- convert each source element to its XHTML equivalent
 goElem :: Element -> Element
 -- goElem :: Element -> (Element, [String])
-goElem (Element (Name elmName _ _) attrs children)
-    | elmName == pack "trk" = Element "--------------> trk" attrs $ Data.Foldable.concatMap goNode children -- trkseg
-    | elmName == pack "trkseg" = Element "--------------> trkseg" attrs $ Data.Foldable.concatMap goNode children -- trkpt
-    | elmName == pack "trkpt" = Element "--------------> trkpt" attrs $ Data.Foldable.concatMap goNode children -- trkpt
-    | elmName == pack "time" = Element "--------------> time" attrs $ Data.Foldable.concatMap goNode children -- extensions
-    | elmName == pack "extensions" = Element "--------------> extensions" attrs $ Data.Foldable.concatMap goNode children -- extensions
+goElem (Element (Name elmName n2 n3) attrs children)
+    -- | elmName == pack "trk" = Element "--------------> trk" attrs $ Data.Foldable.concatMap goNode children -- trkseg
+    -- | elmName == pack "trkseg" = Element "--------------> trkseg" attrs $ Data.Foldable.concatMap goNode children -- trkpt
+    -- | elmName == pack "trkpt" = Element "--------------> trkpt" attrs $ Data.Foldable.concatMap goNode children -- trkpt
+    -- | elmName == pack "time" = Element "--------------> time" attrs $ Data.Foldable.concatMap goNode children -- extensions
+    -- | elmName == pack "extensions" = Element "--------------> extensions" attrs $ Data.Foldable.concatMap goNode children -- extensions
     | elmName == pack "speed" = Element "--------------> speed" attrs $ Data.Foldable.concatMap goNode children
     | elmName == pack "hAcc" = Element "--------------> hAcc" attrs $ Data.Foldable.concatMap goNode children
     | elmName == pack "vAcc" = Element "--------------> vAcc" attrs $ Data.Foldable.concatMap goNode children
@@ -83,7 +104,8 @@ goElem (Element (Name elmName _ _) attrs children)
     --             namePrefix = Nothing
     --         }
     --         attrs $ Data.Foldable.concatMap goNode children
-    | otherwise = Element "" (M.fromList []) []
+    | otherwise = --Element "" (M.fromList []) []
+        Element (Name elmName n2 n3) attrs $ Data.Foldable.concatMap goNode children
 
 -- -- goElem (Element "para" attrs children) =
 -- --     Element "p" attrs $ concatMap goNode children
