@@ -55,7 +55,9 @@ getElevations (Element name attribs children) = [goNode child | child <- childre
 -- elmTpl (a, _) = a 
 
 getElevations2 :: Element -> [(String, String)]
-getElevations2 e = []
+getElevations2 (Element name attribs children) = Data.Foldable.concat ge2
+    where
+        (ge1, ge2) = unzip [goNode' c [] | c <- children]
 
 goNode :: Node -> [Node]
 goNode (NodeElement e) = [NodeElement $ goElem e]
@@ -63,19 +65,30 @@ goNode (NodeContent t) = [NodeContent t]
 goNode (NodeComment _) = [] -- hide comments
 goNode (NodeInstruction _) = [] -- and hide processing instructions too
 
--- goNode' :: Node -> [(String, String)] -> ([Node], [(String, String)])
-goNode' :: Node -> [Node]
-goNode' (NodeElement e) = [NodeElement $ fst (goElem' e [])]
-goNode' (NodeContent t) = [NodeContent t]
-goNode' (NodeComment _) = [] -- hide comments
-goNode' (NodeInstruction _) = [] -- and hide processing instructions too
+goNode' :: Node -> [(String, String)] -> ([Node], [(String, String)])
+-- goNode' :: Node -> [Node]
+goNode' (NodeElement e) xs = ([NodeElement ge1], ge2)
+    where 
+        (ge1, ge2) = goElem' e xs
+goNode' (NodeContent t) xs = ([NodeContent t], xs)
+goNode' (NodeComment _) _ = ([], []) -- hide comments
+goNode' (NodeInstruction _) _ = ([], []) -- and hide processing instructions too
 
+gnlist :: [Node] -> [(String, String)] -> [Node]
+gnlist nlst _ = Data.Foldable.concat g1
+    where
+        (g1, _) = unzip [goNode' c [] | c <- nlst]
+    
+        
 
 goElem' :: Element -> [(String, String)] -> (Element, [(String, String)])
 goElem' (Element (Name elmName n2 n3) attrs children) xs 
     | elmName == pack "speed" = (
-        Element "--------------> speed" attrs $ Data.Foldable.concatMap goNode children, 
-        ("speed", getNodeContent children):xs)
+        -- Element "--------------> speed" attrs $ Data.Foldable.concatMap (goNode' []) children, ("speed", getNodeContent children):xs
+        Element "--------------> speed" attrs $ gnlist children [], ("speed", getNodeContent children):xs)
+            -- where 
+            --     (gn1, gn2) = unzip [goNode' c [] | c <- children] 
+        
     --   | otherwise = (Element (Name elmName n2 n3) attrs children, xs)
     | otherwise = (Element "" (M.fromList []) [], xs)
 
