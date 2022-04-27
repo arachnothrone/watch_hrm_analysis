@@ -35,6 +35,9 @@ getNodeContent (x:xs) = unpack $ getN x
 
 procElem :: Element -> [(String, String)] -> (Element, [(String, String)])
 procElem (Element (Name elmName n2 n3) attrs children) xs 
+    | elmName == pack "trkpt" = procElem 
+                                    (Element "Trackpoint" (M.fromList []) $ Data.Foldable.concat processedChildren) $ 
+                                    Data.Foldable.concat xs'
     | elmName == pack "speed" = (emptyElement, ("Speed", value):xs)
     | elmName == pack "name" = (emptyElement, ("name", value):xs)
     | elmName == pack "time" = (emptyElement, ("time", value):xs)
