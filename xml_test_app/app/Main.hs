@@ -19,16 +19,19 @@ import              Data.List
 data ValuePoint = ValuePoint 
     { paramName     :: String
     , paramValue    :: String
-    } deriving (Show)
+    } -- deriving (Show)
 
---main :: IO [(String, String)]
+instance Show ValuePoint where
+    show (ValuePoint parameter value) = printf "Parameter %7s: %s" parameter value
+
 main :: IO [ValuePoint]
 main = do
     -- readFile will throw any parse errors as runtime exceptions
-    Document prologue root epilogue <- readFile def "src_data/route_example_1.gpx"
+    Document prologue root epilogue <- readFile def "src_data/route_example.gpx"
     Document proFull rootFull epiFull <- readFile def "src_data/apple_health_export/workout-routes/route_2020-07-11_8.04pm.gpx"
     let resultingValues = procMain root
-    putStrLn $ Data.List.unlines $ Data.List.map showDataLine resultingValues
+    -- putStrLn $ Data.List.unlines $ Data.List.map showDataLine resultingValues
+    putStrLn $ Data.List.unlines $ Data.List.map show resultingValues
     return(resultingValues)
 
 showDataLine :: ValuePoint -> String
@@ -41,12 +44,15 @@ getNodeContent (x:xs) = unpack $ getN x
 
 procElem :: Element -> [ValuePoint] -> (Element, [ValuePoint])
 procElem (Element (Name elmName n2 n3) attrs children) xs 
-    | elmName == pack "trkpt" = procElem 
+    -- | elmName == pack "trkpt" = procElem 
+    --                                 (Element "Trackpoint" (M.fromList []) $ Data.Foldable.concat processedChildren) $ 
+    --                                 Data.Foldable.concat xs'
+    | elmName == pack "trkpt" = procElemTrackpoint 
                                     (Element "Trackpoint" (M.fromList []) $ Data.Foldable.concat processedChildren) $ 
                                     Data.Foldable.concat xs'
-    | elmName == pack "speed" = (emptyElement, (ValuePoint "Speed" value):xs)
-    | elmName == pack "name" = (emptyElement, (ValuePoint "name" value):xs)
-    | elmName == pack "time" = (emptyElement, (ValuePoint "time" value):xs)
+    -- | elmName == pack "speed" = (emptyElement, (ValuePoint "Speed" value):xs)
+    -- | elmName == pack "name" = (emptyElement, (ValuePoint "name" value):xs)
+    -- | elmName == pack "time" = (emptyElement, (ValuePoint "time" value):xs)
     -- | elmName == pack "hAcc" = (emptyElement, ("hAcc", value):xs)
     -- | elmName == pack "vAcc" = (emptyElement, ("vAcc", value):xs)
     -- | elmName == pack "ele" = (emptyElement, ("ele", value):xs)
@@ -56,6 +62,16 @@ procElem (Element (Name elmName n2 n3) attrs children) xs
         emptyElement = Element "" (M.fromList []) []
         (processedChildren, xs') = unzip [procNode c xs | c <- children]
 
+procElemTrackpoint :: Element -> [ValuePoint] -> (Element, [ValuePoint])
+procElemTrackpoint (Element (Name elmName n2 n3) attrs children) xs
+    | elmName == pack "time" = (emptyElement, (ValuePoint "time" value):xs)
+    | elmName == pack "speed" = (emptyElement, (ValuePoint "Speed" value):xs)
+    | otherwise = (Element (Name elmName n2 n3) attrs $ Data.Foldable.concat processedChildren, Data.Foldable.concat xs')
+    where
+        value = getNodeContent children
+        emptyElement = Element "" (M.fromList []) []
+        (processedChildren, xs') = unzip [procNodeTrackpoint c xs | c <- children]
+
 procNode :: Node -> [ValuePoint] -> ([Node], [ValuePoint])
 procNode (NodeElement e) xs = ([NodeElement ge1], ge2)
     where
@@ -63,6 +79,14 @@ procNode (NodeElement e) xs = ([NodeElement ge1], ge2)
 procNode (NodeContent t) xs = ([NodeContent t], xs)
 procNode (NodeComment _) _ = ([], [])           -- hide comments
 procNode (NodeInstruction _) _ = ([], [])       -- hide processing instructions
+
+procNodeTrackpoint :: Node -> [ValuePoint] -> ([Node], [ValuePoint])
+procNodeTrackpoint (NodeElement e) xs = ([NodeElement ge1], ge2)
+    where
+        (ge1, ge2) = procElemTrackpoint e xs
+procNodeTrackpoint (NodeContent t) xs = ([NodeContent t], xs)
+procNodeTrackpoint (NodeComment _) _ = ([], [])           -- hide comments
+procNodeTrackpoint (NodeInstruction _) _ = ([], [])       -- hide processing instructions
 
 procMain :: Element -> [ValuePoint]
 procMain rootElement = dataResult
