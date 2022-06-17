@@ -32,9 +32,10 @@ instance Show DataPoint where
 
 type TimeStamp  = String
 type Speed      = String
+type CurrentTS  = String
 
 main :: IO [DataPoint]
--- main :: IO [ValuePoint]
+--main :: IO [ValuePoint]
 main = do
     -- readFile will throw any parse errors as runtime exceptions
     Document prologue root epilogue <- readFile def "src_data/route_example.gpx"
@@ -51,9 +52,13 @@ showDataLine :: ValuePoint -> String
 showDataLine (ValuePoint name value) = printf "%7s = %s" name value
 
 getNodeContent :: [Node] -> String
-getNodeContent (x:xs) = unpack $ getN x 
+getNodeContent [] = "gnc_null"
+getNodeContent (x:xs) = unpack $ getN x
     where 
         getN (NodeContent c) = c 
+        
+-- getNodeContent' :: [Node] -> String
+
 
 procElem :: Element -> [ValuePoint] -> (Element, [ValuePoint])
 procElem (Element (Name elmName n2 n3) attrs children) xs 
@@ -75,16 +80,31 @@ procElem (Element (Name elmName n2 n3) attrs children) xs
         emptyElement = Element "" (M.fromList []) []
         (processedChildren, xs') = unzip [procNode c xs | c <- children]
 
-procElem' :: Element -> [DataPoint] -> (Element, [DataPoint])
-procElem' (Element (Name elmName n2 n3) attrs children) xs
-    | elmName == pack "trkpt" = procElemTrackpoint' 
-                                    (Element "Time" (M.fromList []) $ Data.Foldable.concat processedChildren) $ 
-                                    Data.Foldable.concat xs'
-    | otherwise = (Element (Name elmName n2 n3) attrs $ Data.Foldable.concat processedChildren, Data.Foldable.concat xs')
+procElem' :: Element -> [DataPoint] -> CurrentTS -> (Element, [DataPoint], CurrentTS)
+procElem' (Element (Name elmName n2 n3) attrs children) xs currentTs
+    | elmName == pack "trkpt" = procElem' 
+                                    (Element "TrackPoint" (M.fromList []) $ Data.Foldable.concat processedChildren)
+                                    (Data.Foldable.concat xs')
+                                    (currentTs)
+    | elmName == pack "time" = (emptyElement, xs, value)
+    | elmName == pack "speed" = (emptyElement, (DP currentTs value):xs, "reset_TS")
+    | otherwise = (Element (Name elmName n2 n3) attrs $ Data.Foldable.concat processedChildren, Data.Foldable.concat xs', extractTs currentTsList)
     where
         value = getNodeContent children
         emptyElement = Element "" (M.fromList []) []
-        (processedChildren, xs') = unzip [procNode' c xs | c <- children]
+        --(processedChildren, xs', currentTs') = unzip [procNode' c xs currentTs| c <- children]
+        (processedChildren, xs', currentTsList) = munzip [procNode' c xs currentTs| c <- children]
+        -- ((resElement, resCurrTs), resDPs) = procElemTrackpoint' 
+        --                             (Element "Time" (M.fromList []) $ Data.Foldable.concat processedChildren) (
+        --                             Data.Foldable.concat xs' )(
+        --                             "emptyCurrentTS")
+
+munzip :: [([Node], [DataPoint], CurrentTS)] -> ([[Node]], [[DataPoint]], [CurrentTS])
+munzip = Prelude.undefined
+
+extractTs :: [CurrentTS] -> CurrentTS
+extractTs = Prelude.undefined
+
 
 procElemTrackpoint :: Element -> [ValuePoint] -> (Element, [ValuePoint])
 procElemTrackpoint (Element (Name elmName n2 n3) attrs children) xs
@@ -96,22 +116,32 @@ procElemTrackpoint (Element (Name elmName n2 n3) attrs children) xs
         emptyElement = Element "" (M.fromList []) []
         (processedChildren, xs') = unzip [procNodeTrackpoint c xs | c <- children]
 
-procElemTrackpoint' :: Element -> [DataPoint] -> (Element, [DataPoint])
-procElemTrackpoint' (Element (Name elmName n2 n3) attrs children) xs
-    | elmName == pack "time" = (emptyElement, (DP value "empty"):xs)
-    | elmName == pack "speed" = (emptyElement, (DP ts value):xs)
-    | otherwise = (Element (Name elmName n2 n3) attrs $ Data.Foldable.concat processedChildren, Data.Foldable.concat xs')
+procElemTrackpoint' :: Element -> [DataPoint] -> CurrentTS -> ((Element, CurrentTS), [DataPoint])
+procElemTrackpoint' (Element (Name elmName n2 n3) attrs children) xs currTime
+    -- | elmName == pack "time" = (nonEmptyElement, (DP value "empty"):xs)
+    | elmName == pack "time" = ((emptyElement, value), xs)
+    | elmName == pack "speed" = ((emptyElement, "-"), (DP currTime value):xs)
+    | otherwise = ((Element (Name elmName n2 n3) attrs $ Data.Foldable.concat (fst (unzip resTupList)), currTime), Data.Foldable.concat xs')
     where
         value = getNodeContent children
         emptyElement = Element "" (M.fromList []) []
-        (processedChildren, xs') = unzip [procNodeTrackpoint' c xs | c <- children]
-        (DP ts spd) = getLastDP xs
+        --nonEmptyElement = Element (Name (pack "asdf___________________________") n2 n3) (M.fromList []) []
+        (resTupList, xs') = unzip [procNodeTrackpoint' c xs value | c <- children]
+            -- where
+            --     (processedChildren, tss) = unzip resTupList
+        -- -- (processedChildren, cTs), xs')
+
+        --(DP ts spd) = getHeadDP xs
             -- | Data.List.null xs = DP "TS_null" "SPD_null"
             -- | otherwise = Data.List.last xs
 
 getLastDP :: [DataPoint] -> DataPoint
 getLastDP [] = DP "TS_null" "SPD_null"
 getLastDP xs = Data.List.last xs
+
+getHeadDP :: [DataPoint] -> DataPoint
+getHeadDP [] = DP "TS_null" "SPD_null"
+getHeadDP xs = Data.List.head xs
 
 procNode :: Node -> [ValuePoint] -> ([Node], [ValuePoint])
 procNode (NodeElement e) xs = ([NodeElement ge1], ge2)
@@ -121,13 +151,13 @@ procNode (NodeContent t) xs = ([NodeContent t], xs)
 procNode (NodeComment _) _ = ([], [])           -- hide comments
 procNode (NodeInstruction _) _ = ([], [])       -- hide processing instructions
 
-procNode' :: Node -> [DataPoint] -> ([Node], [DataPoint])
-procNode' (NodeElement e) xs = ([NodeElement ge1], ge2)
+procNode' :: Node -> [DataPoint] -> CurrentTS -> ([Node], [DataPoint], CurrentTS)
+procNode' (NodeElement e) xs ts = ([NodeElement ge1], ge2, ts')
     where
-        (ge1, ge2) = procElem' e xs
-procNode' (NodeContent t) xs = ([NodeContent t], xs)
-procNode' (NodeComment _) _ = ([], [])           -- hide comments
-procNode' (NodeInstruction _) _ = ([], [])       -- hide processing instructions
+        (ge1, ge2, ts') = procElem' e xs ts
+procNode' (NodeContent t) xs ts = ([NodeContent t], xs, ts)
+procNode' (NodeComment _) _ _ = ([], [], "")           -- hide comments
+procNode' (NodeInstruction _) _ _ = ([], [], "")       -- hide processing instructions
 
 procNodeTrackpoint :: Node -> [ValuePoint] -> ([Node], [ValuePoint])
 procNodeTrackpoint (NodeElement e) xs = ([NodeElement ge1], ge2)
@@ -137,13 +167,13 @@ procNodeTrackpoint (NodeContent t) xs = ([NodeContent t], xs)
 procNodeTrackpoint (NodeComment _) _ = ([], [])           -- hide comments
 procNodeTrackpoint (NodeInstruction _) _ = ([], [])       -- hide processing instructions
 
-procNodeTrackpoint' :: Node -> [DataPoint] -> ([Node], [DataPoint])
-procNodeTrackpoint' (NodeElement e) xs = ([NodeElement ge1], ge2)
+procNodeTrackpoint' :: Node -> [DataPoint] -> CurrentTS -> (([Node], CurrentTS), [DataPoint])
+procNodeTrackpoint' (NodeElement e) xs currTime = (([NodeElement ge1], ts), ge2)
     where
-        (ge1, ge2) = procElemTrackpoint' e xs
-procNodeTrackpoint' (NodeContent t) xs = ([NodeContent t], xs)
-procNodeTrackpoint' (NodeComment _) _ = ([], [])           -- hide comments
-procNodeTrackpoint' (NodeInstruction _) _ = ([], [])       -- hide processing instructions
+        ((ge1, ts), ge2) = procElemTrackpoint' e xs currTime
+procNodeTrackpoint' (NodeContent t) xs ts = (([NodeContent t], ts), xs)
+procNodeTrackpoint' (NodeComment _) _ _ = (([], ""), [])           -- hide comments
+procNodeTrackpoint' (NodeInstruction _) _ _ = (([], ""), [])       -- hide processing instructions
 
 procMain :: Element -> [ValuePoint]
 procMain rootElement = dataResult
@@ -153,7 +183,7 @@ procMain rootElement = dataResult
 procMain' :: Element -> [DataPoint]
 procMain' rootElement = dataResult
     where
-        (_, dataResult) = procElem' rootElement []
+        (_, dataResult, _) = procElem' rootElement [] "no_ts"
 
 -- map with ints as keys and strings as values
 myMap :: M.Map Int String
