@@ -42,7 +42,7 @@ main = do
     Document prologue root epilogue <- readFile def "src_data/route_example.gpx"
     Document proFull rootFull epiFull <- readFile def "src_data/apple_health_export/workout-routes/route_2020-07-11_8.04pm.gpx"
     --let resultingValues = procMain root
-    let resultingValues = procMain'' root
+    let resultingValues = procMain'' rootFull
 
 
     -- putStrLn $ Data.List.unlines $ Data.List.map showDataLine resultingValues
@@ -117,11 +117,12 @@ procElem'' (Element (Name elmName n2 n3) attrs children) xs
     where
         emptyElement = Element "" (M.fromList []) []
         (processedChildren, xs') = unzip [procNode'' c xs | c <- children]
-        (processedChildrenTP, xsTP, tsTPs) = munzip [procNodeTP'' c xs "no_ts_ntp" | c <- children]
-        (elementTP, dataPointsTP, _) = procElemTP'' 
-                                    (Element "TrackPoint" (M.fromList []) $ Data.Foldable.concat processedChildrenTP)
-                                    (Data.Foldable.concat xsTP)
-                                    ("no_ts_eltp")
+        --(processedChildrenTP, xsTP, tsTPs) = munzip [procNodeTP'' c xs "start" | c <- children] -- fold .....
+        (processedChildrenTP, xsTP, tsTP, _) = procNodesTP'' children xs "start"
+        (elementTP, dataPointsTP, ttt) = procElemTP'' 
+                                    (Element "TrackPoint" (M.fromList []) $ processedChildrenTP)
+                                    (xsTP)
+                                    (tsTP)
 
 procNode'' :: Node -> [DataPoint] -> ([Node], [DataPoint])
 --procNode'' = Prelude.undefined
@@ -137,11 +138,13 @@ procElemTP'' (Element (Name elmName n2 n3) attrs childNodes) xs currTime
     | elmName == pack "time" = (emptyElement, xs, value)
     | elmName == pack "speed" = (emptyElement, (DP currTime value):xs, "closed")
     -- | otherwise = (emptyElement, xs, currTime)
-    | otherwise = (Element (Name elmName n2 n3) attrs $ Data.Foldable.concat processedChildrenTP, Data.Foldable.concat xsTP, extractTs tsTPs)
+    -- | otherwise = (Element (Name elmName n2 n3) attrs $ Data.Foldable.concat processedChildrenTP, Data.Foldable.concat xsTP, extractTs tsTPs)
+    | otherwise = (Element (Name elmName n2 n3) attrs $ processedChildrenTP, xsTP, tsTPs)
     where
         emptyElement = Element "" (M.fromList []) []
         value = getNodeContent childNodes
-        (processedChildrenTP, xsTP, tsTPs) = munzip [procNodeTP'' c xs "no_ts_etp" | c <- childNodes]
+        -- (processedChildrenTP, xsTP, tsTPs) = munzip [procNodeTP'' c xs currTime | c <- childNodes]
+        (processedChildrenTP, xsTP, tsTPs, _) = procNodesTP'' childNodes xs currTime
 
 procNodeTP'' :: Node -> [DataPoint] -> CurrentTS -> ([Node], [DataPoint], CurrentTS)
 procNodeTP'' (NodeElement e) xs ts = ([NodeElement resElement], resDps, resTs)
@@ -151,7 +154,11 @@ procNodeTP'' (NodeContent t) xs ts = ([NodeContent t], xs, ts)
 procNodeTP'' (NodeComment _) _ _ = ([], [], "")
 procNodeTP'' (NodeInstruction _) _ _ = ([], [], "")
 
-
+procNodesTP'' :: [Node] -> [DataPoint] -> CurrentTS -> ([Node], [DataPoint], CurrentTS, [Node])
+procNodesTP'' [] dps ts = ([], dps, ts, [])
+procNodesTP'' (nd:nds) dps ts = procNodesTP'' nds dps2 ts2 
+    where
+        (nds2, dps2, ts2) = procNodeTP'' nd dps ts 
 
 
 
