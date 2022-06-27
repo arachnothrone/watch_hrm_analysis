@@ -276,3 +276,308 @@ Element {
         </trk>
     </body>
 </html>
+
+
+
+
+
+
+
+
+
+export.xml
+
+
+ <Record type="HKQuantityTypeIdentifierHeartRate" sourceName="Alex’s Apple Watch" sourceVersion="6.2.8" device="&lt;&lt;HKDevice: 0x281e63930&gt;, name:Apple Watch, manufacturer:Apple Inc., model:Watch, hardware:Watch5,2, software:6.2.8&gt;" unit="count/min" creationDate="2021-03-10 13:59:09 -0500" startDate="2021-03-10 13:51:47 -0500" endDate="2021-03-10 13:51:47 -0500" value="62">
+  <MetadataEntry key="HKMetadataKeyHeartRateMotionContext" value="1"/>
+ </Record>
+ <Record type="HKQuantityTypeIdentifierHeartRate" sourceName="Alex’s Apple Watch" sourceVersion="6.2.8" device="&lt;&lt;HKDevice: 0x281e63930&gt;, name:Apple Watch, manufacturer:Apple Inc., model:Watch, hardware:Watch5,2, software:6.2.8&gt;" unit="count/min" creationDate="2021-03-10 14:03:50 -0500" startDate="2021-03-10 13:58:40 -0500" endDate="2021-03-10 13:58:40 -0500" value="55">
+  <MetadataEntry key="HKMetadataKeyHeartRateMotionContext" value="1"/>
+ </Record>
+ <Record type="HKQuantityTypeIdentifierHeartRate" sourceName="Alex’s Apple Watch" sourceVersion="6.2.8" device="&lt;&lt;HKDevice: 0x281e63930&gt;, name:Apple Watch, manufacturer:Apple Inc., model:Watch, hardware:Watch5,2, software:6.2.8&gt;" unit="count/min" creationDate="2021-03-10 14:08:01 -0500" startDate="2021-03-10 14:05:15 -0500" endDate="2021-03-10 14:05:15 -0500" value="71">
+  <MetadataEntry key="HKMetadataKeyHeartRateMotionContext" value="1"/>
+ </Record>
+
+
+
+apple export 4:
+    export.xml
+
+ <Record type="HKQuantityTypeIdentifierHeartRate" sourceName="Alex’s Apple Watch" sourceVersion="7.6.2" device="&lt;&lt;HKDevice: 0x283b0cf50&gt;, name:Apple Watch, manufacturer:Apple Inc., model:Watch, hardware:Watch5,2, software:7.6.2&gt;" unit="count/min" creationDate="2022-01-14 20:16:52 -0400" startDate="2022-01-14 20:16:49 -0400" endDate="2022-01-14 20:16:49 -0400" value="177">
+  <MetadataEntry key="HKMetadataKeyHeartRateMotionContext" value="2"/>
+ </Record>
+ <Record type="HKQuantityTypeIdentifierHeartRate" sourceName="Alex’s Apple Watch" sourceVersion="7.6.2" device="&lt;&lt;HKDevice: 0x283b0cf50&gt;, name:Apple Watch, manufacturer:Apple Inc., model:Watch, hardware:Watch5,2, software:7.6.2&gt;" unit="count/min" creationDate="2022-01-14 20:16:57 -0400" startDate="2022-01-14 20:16:52 -0400" endDate="2022-01-14 20:16:52 -0400" value="177">
+  <MetadataEntry key="HKMetadataKeyHeartRateMotionContext" value="2"/>
+ </Record>
+ <Record type="HKQuantityTypeIdentifierHeartRate" sourceName="Alex’s Apple Watch" sourceVersion="7.6.2" device="&lt;&lt;HKDevice: 0x283b0cf50&gt;, name:Apple Watch, manufacturer:Apple Inc., model:Watch, hardware:Watch5,2, software:7.6.2&gt;" unit="count/min" creationDate="2022-01-14 20:17:02 -0400" startDate="2022-01-14 20:17:01 -0400" endDate="2022-01-14 20:17:01 -0400" value="179">
+  <MetadataEntry key="HKMetadataKeyHeartRateMotionContext" value="2"/>
+ </Record>
+ <Record type="HKQuantityTypeIdentifierHeartRate" sourceName="Alex’s Apple Watch" sourceVersion="7.6.2" device="&lt;&lt;HKDevice: 0x283b0d810&gt;, name:Apple Watch, manufacturer:Apple Inc., model:Watch, hardware:Watch5,2, software:7.6.2&gt;" unit="count/min" creationDate="2022-01-14 20:17:07 -0400" startDate="2022-01-14 20:17:02 -0400" endDate="2022-01-14 20:17:02 -0400" value="178">
+  <MetadataEntry key="HKMetadataKeyHeartRateMotionContext" value="2"/>
+ </Record>
+
+
+    export_cda.xml
+
+     <component>
+      <observation classCode="OBS" moodCode="EVN">
+       <templateId root="2.16.840.1.113883.10.20.22.4.27"/>
+       <id root="c6f88321-67ad-11db-bd13-0800200c9a66"/>
+       <code code="8867-4" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="Heart rate"/>
+       <text>
+        <sourceName>Alex’s Apple Watch</sourceName>
+        <sourceVersion>7.6.2</sourceVersion>
+        <device>&lt;&lt;HKDevice: 0x283b0cf50&gt;, name:Apple Watch, manufacturer:Apple Inc., model:Watch, hardware:Watch5,2, software:7.6.2&gt;</device>
+        <value>177</value>
+        <type>HKQuantityTypeIdentifierHeartRate</type>
+        <unit>count/min</unit>
+        <metadataEntry>
+         <key>HKMetadataKeyHeartRateMotionContext</key>
+         <value>2</value>
+        </metadataEntry>
+       </text>
+       <statusCode code="completed"/>
+       <effectiveTime>
+        <low value="20220114201649-0400"/>
+        <high value="20220114201649-0400"/>
+       </effectiveTime>
+       <value xsi:type="PQ" value="177" unit="count/min"/>
+       <interpretationCode code="N" codeSystem="2.16.840.1.113883.5.83"/>
+      </observation>
+     </component>
+
+          <component>
+      <observation classCode="OBS" moodCode="EVN">
+       <templateId root="2.16.840.1.113883.10.20.22.4.27"/>
+       <id root="c6f88321-67ad-11db-bd13-0800200c9a66"/>
+       <code code="8867-4" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="Heart rate"/>
+       <text>
+        <sourceName>Alex’s Apple Watch</sourceName>
+        <sourceVersion>7.6.2</sourceVersion>
+        <device>&lt;&lt;HKDevice: 0x283b0cf50&gt;, name:Apple Watch, manufacturer:Apple Inc., model:Watch, hardware:Watch5,2, software:7.6.2&gt;</device>
+        <value>177</value>
+        <type>HKQuantityTypeIdentifierHeartRate</type>
+        <unit>count/min</unit>
+        <metadataEntry>
+         <key>HKMetadataKeyHeartRateMotionContext</key>
+         <value>2</value>
+        </metadataEntry>
+       </text>
+       <statusCode code="completed"/>
+       <effectiveTime>
+        <low value="20220114201652-0400"/>
+        <high value="20220114201652-0400"/>
+       </effectiveTime>
+       <value xsi:type="PQ" value="177" unit="count/min"/>
+       <interpretationCode code="N" codeSystem="2.16.840.1.113883.5.83"/>
+      </observation>
+     </component>
+
+          <component>
+      <observation classCode="OBS" moodCode="EVN">
+       <templateId root="2.16.840.1.113883.10.20.22.4.27"/>
+       <id root="c6f88321-67ad-11db-bd13-0800200c9a66"/>
+       <code code="8867-4" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="Heart rate"/>
+       <text>
+        <sourceName>Alex’s Apple Watch</sourceName>
+        <sourceVersion>7.6.2</sourceVersion>
+        <device>&lt;&lt;HKDevice: 0x283b0cf50&gt;, name:Apple Watch, manufacturer:Apple Inc., model:Watch, hardware:Watch5,2, software:7.6.2&gt;</device>
+        <value>179</value>
+        <type>HKQuantityTypeIdentifierHeartRate</type>
+        <unit>count/min</unit>
+        <metadataEntry>
+         <key>HKMetadataKeyHeartRateMotionContext</key>
+         <value>2</value>
+        </metadataEntry>
+       </text>
+       <statusCode code="completed"/>
+       <effectiveTime>
+        <low value="20220114201701-0400"/>
+        <high value="20220114201701-0400"/>
+       </effectiveTime>
+       <value xsi:type="PQ" value="179" unit="count/min"/>
+       <interpretationCode code="N" codeSystem="2.16.840.1.113883.5.83"/>
+      </observation>
+     </component>
+
+          <component>
+      <observation classCode="OBS" moodCode="EVN">
+       <templateId root="2.16.840.1.113883.10.20.22.4.27"/>
+       <id root="c6f88321-67ad-11db-bd13-0800200c9a66"/>
+       <code code="8867-4" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="Heart rate"/>
+       <text>
+        <sourceName>Alex’s Apple Watch</sourceName>
+        <sourceVersion>7.6.2</sourceVersion>
+        <device>&lt;&lt;HKDevice: 0x283b0d810&gt;, name:Apple Watch, manufacturer:Apple Inc., model:Watch, hardware:Watch5,2, software:7.6.2&gt;</device>
+        <value>178</value>
+        <type>HKQuantityTypeIdentifierHeartRate</type>
+        <unit>count/min</unit>
+        <metadataEntry>
+         <key>HKMetadataKeyHeartRateMotionContext</key>
+         <value>2</value>
+        </metadataEntry>
+       </text>
+       <statusCode code="completed"/>
+       <effectiveTime>
+        <low value="20220114201702-0400"/>
+        <high value="20220114201702-0400"/>
+       </effectiveTime>
+       <value xsi:type="PQ" value="178" unit="count/min"/>
+       <interpretationCode code="N" codeSystem="2.16.840.1.113883.5.83"/>
+      </observation>
+     </component>
+
+
+
+
+
+
+
+
+     *Main Text.XML M Data.List Data.Text> rootHData
+Element {
+    elementName = Name {
+        nameLocalName = "HealthData", 
+        nameNamespace = Nothing, 
+        namePrefix = Nothing
+    }, 
+    elementAttributes = fromList [
+        (Name {nameLocalName = "locale", nameNamespace = Nothing, namePrefix = Nothing},"en_CA")
+    ], 
+    elementNodes = [
+        NodeContent "\n ",
+        NodeElement (
+            Element {
+                elementName = Name {
+                    nameLocalName = "ExportDate", 
+                    nameNamespace = Nothing, 
+                    namePrefix = Nothing
+                }, 
+                elementAttributes = fromList [
+                    (Name {
+                        nameLocalName = "value", 
+                        nameNamespace = Nothing, 
+                        namePrefix = Nothing
+                    },"2021-11-13 20:59:35 -0500")
+                ], 
+                elementNodes = []
+            }
+        ),
+        NodeContent "\n ",
+        NodeElement (
+            Element {
+                elementName = Name {
+                    nameLocalName = "Me", 
+                    nameNamespace = Nothing, 
+                    namePrefix = Nothing
+                }, 
+                elementAttributes = fromList [
+                    (Name {
+                        nameLocalName = "HKCharacteristicTypeIdentifierBiologicalSex", 
+                        nameNamespace = Nothing, 
+                        namePrefix = Nothing
+                    },"HKBiologicalSexMale"),
+                    (Name {
+                        nameLocalName = "HKCharacteristicTypeIdentifierBloodType", 
+                        nameNamespace = Nothing, 
+                        namePrefix = Nothing
+                    },"HKBloodTypeBNegative"),
+                    (Name {
+                        nameLocalName = "HKCharacteristicTypeIdentifierCardioFitnessMedicationsUse", 
+                        nameNamespace = Nothing, 
+                        namePrefix = Nothing
+                    },"None"),
+                    (Name {
+                        nameLocalName = "HKCharacteristicTypeIdentifierDateOfBirth", 
+                        nameNamespace = Nothing, 
+                        namePrefix = Nothing
+                    },"1978-08-22"),
+                    (Name {
+                        nameLocalName = "HKCharacteristicTypeIdentifierFitzpatrickSkinType", 
+                        nameNamespace = Nothing, 
+                        namePrefix = Nothing
+                    },"HKFitzpatrickSkinTypeNotSet")
+                ], 
+                elementNodes = []
+            }),
+            NodeContent "\n ",
+            NodeElement (
+                Element {
+                    elementName = Name {
+                        nameLocalName = "Record", 
+                        nameNamespace = Nothing, 
+                        namePrefix = Nothing
+                    }, 
+                    elementAttributes = fromList [
+                        (Name {
+                            nameLocalName = "creationDate", 
+                            nameNamespace = Nothing, 
+                            namePrefix = Nothing
+                        },"2020-08-05 10:18:56 -0500"),
+                        (Name {
+                            nameLocalName = "endDate", 
+                            nameNamespace = Nothing, 
+                            namePrefix = Nothing
+                        },"2020-08-05 10:18:00 -0500"),
+                        (Name {
+                            nameLocalName = "sourceName", 
+                            nameNamespace = Nothing, 
+                            namePrefix = Nothing
+                        },"Health"),
+                        (Name {
+                            nameLocalName = "sourceVersion", 
+                            nameNamespace = Nothing, 
+                            namePrefix = Nothing
+                        },"13.5.1"),
+                        (Name {
+                            nameLocalName = "startDate", 
+                            nameNamespace = Nothing, 
+                            namePrefix = Nothing
+                        },"2020-08-05 10:18:00 -0500"),
+                        (Name {
+                            nameLocalName = "type", 
+                            nameNamespace = Nothing, 
+                            namePrefix = Nothing
+                        },"HKQuantityTypeIdentifierBodyMassIndex"),
+                        (Name {
+                            nameLocalName = "unit", 
+                            nameNamespace = Nothing, 
+                            namePrefix = Nothing
+                        },"count"),
+                        (Name {
+                            nameLocalName = "value", 
+                            nameNamespace = Nothing, 
+                            namePrefix = Nothing
+                        },"23.68")
+                    ], 
+                    elementNodes = [
+                        NodeContent "\n  ",
+                        NodeElement (
+                            Element {
+                                elementName = Name {
+                                    nameLocalName = "MetadataEntry", 
+                                    nameNamespace = Nothing, 
+                                    namePrefix = Nothing
+                                }, 
+                                elementAttributes = fromList [
+                                    (Name {
+                                        nameLocalName = "key", 
+                                        nameNamespace = Nothing, 
+                                        namePrefix = Nothing
+                                    },"HKWasUserEntered"),
+                                    (Name {
+                                        nameLocalName = "value", 
+                                        nameNamespace = Nothing, 
+                                        namePrefix = Nothing
+                                    },"1")
+                                ], 
+                                elementNodes = []
+                            }),
+                        NodeContent "\n "
+                    ]
+                }
+            ),
+            NodeContent "\n ",
+            NodeContent "\n\n"]}
+
+

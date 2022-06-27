@@ -12,6 +12,8 @@ import              Data.Text
 import              Data.Foldable
 import              Text.Printf
 import              Data.List
+import              Data.Maybe
+import              Data.String
 
 -- import qualified Data.Map.Strict as Map
 -- import Data.Map (Map())
@@ -21,7 +23,7 @@ data ValuePoint = ValuePoint
     , paramValue    :: String
     } -- deriving (Show)
 
-data DataPoint = DP TimeStamp Speed
+data DataPoint = DP TimeStamp Speed | GPS Latitude Longitude | HD RecordType TimeStamp Value
 --data DataPointHR = undefined
 
 instance Show ValuePoint where
@@ -29,10 +31,16 @@ instance Show ValuePoint where
 
 instance Show DataPoint where
     show (DP time speedValue) = printf "Time: %s, speed: %s" time speedValue
+    show (GPS latitude longitude) = printf "Lat: %s, Lon: %s" latitude longitude
+    show (HD record time value) = printf "%s: %s = %s" time record value
 
 type TimeStamp  = String
 type Speed      = String
 type CurrentTS  = String
+type Latitude   = String
+type Longitude  = String
+type Value      = String
+type RecordType = String -- -> BMI | HR (heart rate)| ...
 
 main :: IO ()
 -- main :: IO [DataPoint]
@@ -41,12 +49,14 @@ main = do
     -- readFile will throw any parse errors as runtime exceptions
     Document prologue root epilogue <- readFile def "src_data/route_example.gpx"
     Document proFull rootFull epiFull <- readFile def "src_data/apple_health_export/workout-routes/route_2020-07-11_8.04pm.gpx"
+    Document prologueHData rootHData epilogueHData <- readFile def  "src_data/healthdata_example.xml" -- "src_data/healthdata_example.xml" -- "src_data/apple_health_export/export.xml"
     --let resultingValues = procMain root
-    let resultingValues = procMain'' rootFull
-
+    let resultingValues = procMain'' root
+    let resultHealthData = procHealthData rootHData
 
     -- putStrLn $ Data.List.unlines $ Data.List.map showDataLine resultingValues
     putStrLn $ Data.List.unlines $ Data.List.map show resultingValues
+    putStrLn $ Data.List.unlines $ Data.List.map show resultHealthData
     return () -- (resultingValues)
 
 showDataLine :: ValuePoint -> String
@@ -112,7 +122,7 @@ procElem' (Element (Name elmName n2 n3) attrs children) xs currentTs
 
 procElem'' :: Element -> [DataPoint] -> (Element, [DataPoint])
 procElem'' (Element (Name elmName n2 n3) attrs children) xs 
-    | elmName == pack "trkpt" = (elementTP, dataPointsTP)
+    | elmName == pack "trkpt" = (elementTP, dataPointsTP ++ dataPointsTP_attrs)
     | otherwise = (Element (Name elmName n2 n3) attrs $ Data.Foldable.concat processedChildren, Data.Foldable.concat xs')
     where
         emptyElement = Element "" (M.fromList []) []
@@ -123,6 +133,58 @@ procElem'' (Element (Name elmName n2 n3) attrs children) xs
                                     (Element "TrackPoint" (M.fromList []) $ processedChildrenTP)
                                     (xsTP)
                                     (tsTP)
+        dataPointsTP_attrs = processAttributes $ M.toList attrs
+
+procElemHD :: Element -> [DataPoint] -> (Element, [DataPoint])
+procElemHD (Element (Name elmName n2 n3) attrs children) xs 
+    -- | elmName == pack "Record" = (emptyElement, (HD recType recTs recVal):xs)
+    | elmName == pack "Record" = (emptyElement, newDataPoints)
+    | otherwise = (Element (Name elmName n2 n3) attrs $ Data.Foldable.concat processedChildren, Data.Foldable.concat xs')
+    where
+        -- (_, (recType, recTs, recVal)) = procAttribHD (M.toList attrs, ("", "", ""))
+        emptyElement = Element "" (M.fromList []) []
+        (processedChildren, xs') = unzip [procNodeHD c xs | c <- children]
+        -- (_, dpResult) = procAttribHD (M.toList attrs, Just ("", "", ""))
+        dpResult = procAttribHD attrs
+        newDataPoints = case dpResult of
+            Just (recType, recTs, recVal) -> (HD (unpack recType) (unpack recTs) (unpack recVal)):xs
+            Nothing                       -> xs
+
+-- procAttribHD :: ([(Name, Text)], Maybe (RecordType, TimeStamp, Value)) -> ([(Name, Text)], Maybe (RecordType, TimeStamp, Value))
+-- procAttribHD ([], result) = ([], result)
+-- procAttribHD (((Name a b c, currValue):xs), Just (rectype, ts, val))
+--     | a == pack "type" && currValue == pack "HKQuantityTypeIdentifierBodyMassIndex" = procAttribHD_record_bmi(xs, Just ("bmi", ts, val))
+--     -- | rectype == "bmi" = (xs, Just (rectype, ts, val))
+--     -- | a == pack "startDate" = procAttribHD(xs, Just (rectype, Data.Text.unpack currValue, val))
+--     -- | rectype == "bmi" && a == pack "value" = procAttribHD(xs, Just (rectype, ts, Data.Text.unpack currValue))
+--     | otherwise = ([], Nothing) -- procAttribHD(xs, Just (rectype, ts, val))
+
+findRecord :: (Maybe RecordType, Maybe TimeStamp, Maybe Value) -> Maybe (RecordType, TimeStamp, Value)
+findRecord (Just a, Just b, Just c) = Just (a, b, c)
+findRecord (_, _, _) = Nothing
+
+--procAttribHD :: (Ord k, Data.String.IsString k) => M.Map k c -> Maybe (c, c, c)
+--procAttribHD :: M.Map k c -> Maybe (c, c, c)
+procAttribHD attrs = do
+            rectyp  <- M.lookup "type" attrs
+            rectype <- if (rectyp == pack "HKQuantityTypeIdentifierBodyMassIndex") then (Just rectyp) else Nothing 
+            recTs   <- M.lookup "startDate" attrs
+            recVal  <- M.lookup "value" attrs
+            return (rectype, recTs, recVal)
+
+procAttribHD_record_bmi :: ([(Name, Text)], Maybe (RecordType, TimeStamp, Value)) -> ([(Name, Text)], Maybe (RecordType, TimeStamp, Value))
+procAttribHD_record_bmi ([], result) = ([], result)
+procAttribHD_record_bmi (((Name a b c, currValue):xs), Just (rectype, ts, val))
+    | a == pack "startDate" = procAttribHD_record_bmi(xs, Just (rectype, Data.Text.unpack currValue, val))
+    | a == pack "value" = procAttribHD_record_bmi(xs, Just (rectype, ts, Data.Text.unpack currValue))
+    | otherwise = procAttribHD_record_bmi(xs, Just (rectype, ts, val))
+
+
+processAttributes :: [(Name, Text)] -> [DataPoint]
+-- processAttributes :: M.Map -> [DataPoint]
+processAttributes [] = []
+processAttributes ((Name a b c, value):xs) = (GPS (Data.Text.unpack a) (Data.Text.unpack value)) : processAttributes xs 
+-- processAttributes attrs = 
 
 procNode'' :: Node -> [DataPoint] -> ([Node], [DataPoint])
 --procNode'' = Prelude.undefined
@@ -254,6 +316,14 @@ procNodeTrackpoint' (NodeContent t) xs ts = (([NodeContent t], ts), xs)
 procNodeTrackpoint' (NodeComment _) _ _ = (([], ""), [])           -- hide comments
 procNodeTrackpoint' (NodeInstruction _) _ _ = (([], ""), [])       -- hide processing instructions
 
+procNodeHD :: Node -> [DataPoint] -> ([Node], [DataPoint])
+procNodeHD (NodeElement e) xs = ([NodeElement ge1], ge2)
+    where
+        (ge1, ge2) = procElemHD e xs
+procNodeHD (NodeContent t) xs = ([NodeContent t], xs)
+procNodeHD (NodeComment _) _ = ([], [])           -- hide comments
+procNodeHD (NodeInstruction _) _ = ([], [])       -- hide processing instructions
+
 procMain :: Element -> [ValuePoint]
 procMain rootElement = dataResult
     where
@@ -268,6 +338,11 @@ procMain'' :: Element -> [DataPoint]
 procMain'' rootElement = dataResult
     where
         (_, dataResult) = procElem'' rootElement []
+
+procHealthData :: Element -> [DataPoint]
+procHealthData rootElement = dataResult
+    where
+        (_, dataResult) = procElemHD rootElement []
 
 -- map with ints as keys and strings as values
 myMap :: M.Map Int String
