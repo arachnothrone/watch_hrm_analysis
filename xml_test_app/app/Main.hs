@@ -14,6 +14,7 @@ import              Text.Printf
 import              Data.List
 import              Data.Maybe
 import              Data.String
+import              Data.List.Split         -- splitOn
 
 -- import qualified Data.Map.Strict as Map
 -- import Data.Map (Map())
@@ -57,10 +58,48 @@ main = do
     -- putStrLn $ Data.List.unlines $ Data.List.map showDataLine resultingValues
     putStrLn $ Data.List.unlines $ Data.List.map show resultingValues
     putStrLn $ Data.List.unlines $ Data.List.map show resultHealthData
+    appendFile "export/testfile.txt" "33333------essss\n"
     return () -- (resultingValues)
 
 showDataLine :: ValuePoint -> String
 showDataLine (ValuePoint name value) = printf "%7s = %s" name value
+
+dataPointString :: DataPoint -> String
+dataPointString (HD record time value) = printf "%s, %s\n" time value
+
+mntMappingReg   = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+mntMappingLeap  = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+
+getMntDays mntNum yLeap = case yLeap of
+    False   -> mntMappingReg !! (mntNum - 1)
+    True    -> mntMappingLeap !! (mntNum - 1)
+
+isYearLeap :: Int -> Bool
+isYearLeap year = case year `mod` 4 of
+    0   -> case year `mod` 100 of
+        0   -> case year `mod` 400 of 
+            0   -> True
+            _   -> False
+        _   -> True
+    _   -> False
+
+startYear = 2020
+secondsInOneMin = 60
+secondsInOneHour = 60 * secondsInOneMin
+secondsInOneDay = 24 * secondsInOneHour
+secondsInOneMonth mnt leap = getMntDays mnt leap * secondsInOneDay
+secondsInOneYear year = Data.Foldable.foldl (+) 0 [secondsInOneMonth mntNum $ isYearLeap year | mntNum <- [1..12]]
+
+-- 2021-11-10 13:18:33 -0500
+convertTimeToSec :: String -> Maybe Int
+convertTimeToSec tsString = do
+    let splitstr1 = Data.List.Split.splitOn " " tsString     -- Data.List.Split.
+    -- dateList <- Data.List.Split.splitOn "-" splitstr1!!0
+    -- timeList <- Data.List.Split.splitOn ":" splitstr1!!1
+    return (dateSeconds + timeSeconds)
+        where 
+            dateSeconds = Prelude.undefined
+            timeSeconds = Prelude.undefined
 
 getNodeContent :: [Node] -> String
 getNodeContent [] = "gnc_null"
@@ -165,9 +204,12 @@ findRecord (_, _, _) = Nothing
 
 --procAttribHD :: (Ord k, Data.String.IsString k) => M.Map k c -> Maybe (c, c, c)
 --procAttribHD :: M.Map k c -> Maybe (c, c, c)
+procAttribHD :: (Ord k, IsString k) => M.Map k Text -> Maybe (Text, Text, Text)
 procAttribHD attrs = do
             rectyp  <- M.lookup "type" attrs
-            rectype <- if (rectyp == pack "HKQuantityTypeIdentifierBodyMassIndex") then (Just rectyp) else Nothing 
+            -- rectype <- if (rectyp == pack "HKQuantityTypeIdentifierBodyMassIndex") then (Just rectyp) else Nothing
+            -- rectype <- if (rectyp == pack "HKQuantityTypeIdentifierBodyMassIndex") then (Just $ pack "bmi") else Nothing
+            rectype <- if (rectyp == pack "HKQuantityTypeIdentifierHeartRate") then (Just $ pack "hr") else Nothing
             recTs   <- M.lookup "startDate" attrs
             recVal  <- M.lookup "value" attrs
             return (rectype, recTs, recVal)

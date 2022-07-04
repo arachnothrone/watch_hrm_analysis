@@ -23,4 +23,5 @@ cabal.project.local~
 .ghc.environment.*
 src_data/
 examples/
+export/
 
