@@ -15,6 +15,7 @@ import              Data.List
 import              Data.Maybe
 import              Data.String
 import              Data.List.Split         -- splitOn
+import              Parsing
 
 -- import qualified Data.Map.Strict as Map
 -- import Data.Map (Map())
@@ -27,6 +28,9 @@ data ValuePoint = ValuePoint
 data DataPoint = DP TimeStamp Speed | GPS Latitude Longitude | HD RecordType TimeStamp Value
 --data DataPointHR = undefined
 
+data TimeStampObj = TS Year Month Day Hour Min Sec TZOffset
+data TZOffset = TZO TzSign Hour Min
+
 instance Show ValuePoint where
     show (ValuePoint parameter value) = printf "Parameter %7s: %s" parameter value
 
@@ -35,6 +39,13 @@ instance Show DataPoint where
     show (GPS latitude longitude) = printf "Lat: %s, Lon: %s" latitude longitude
     show (HD record time value) = printf "%s: %s = %s" time record value
 
+instance Show TimeStampObj where
+    -- show (TS year month day hour min sec tsOffs) = printf "%4d-%2d-%2d %2d:%2d:%2d UTC%d" year month day hour min sec tsOffs
+    show (TS year month day hour min sec tsOffs) = printf "%4d-%2d-%2d %2d:%2d:%2d %s" year month day hour min sec $ show tsOffs
+
+instance Show TZOffset where
+    show (TZO sign hour min) = printf "UTC%c%02d:%02d" sign hour min
+
 type TimeStamp  = String
 type Speed      = String
 type CurrentTS  = String
@@ -42,6 +53,16 @@ type Latitude   = String
 type Longitude  = String
 type Value      = String
 type RecordType = String -- -> BMI | HR (heart rate)| ...
+
+type Year       = Int
+type Day        = Int
+type Month      = Int
+type Hour       = Int
+type Min        = Int
+type Sec        = Int
+--type TZOffset   = Int
+type TzSign     = Char
+
 
 main :: IO ()
 -- main :: IO [DataPoint]
@@ -70,24 +91,13 @@ dataPointString (HD record time value) = printf "%s, %s\n" time value
 mntMappingReg   = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
 mntMappingLeap  = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
 
-getMntDays mntNum yLeap = case yLeap of
-    False   -> mntMappingReg !! (mntNum - 1)
-    True    -> mntMappingLeap !! (mntNum - 1)
 
-isYearLeap :: Int -> Bool
-isYearLeap year = case year `mod` 4 of
-    0   -> case year `mod` 100 of
-        0   -> case year `mod` 400 of 
-            0   -> True
-            _   -> False
-        _   -> True
-    _   -> False
 
 startYear = 2020
-secondsInOneMin = 60
-secondsInOneHour = 60 * secondsInOneMin
-secondsInOneDay = 24 * secondsInOneHour
-secondsInOneMonth mnt leap = getMntDays mnt leap * secondsInOneDay
+secondsInOneMin = 60 -- :: Integer
+secondsInOneHour = 60 * secondsInOneMin -- :: Integer
+secondsInOneDay = (24 * secondsInOneHour) -- :: Integer
+secondsInOneMonth mnt leap = (getMntDays mnt leap * secondsInOneDay) -- :: Integer
 secondsInOneYear year = Data.Foldable.foldl (+) 0 [secondsInOneMonth mntNum $ isYearLeap year | mntNum <- [1..12]]
 
 -- 2021-11-10 13:18:33 -0500
@@ -100,6 +110,110 @@ convertTimeToSec tsString = do
         where 
             dateSeconds = Prelude.undefined
             timeSeconds = Prelude.undefined
+
+isYearLeap :: Int -> Bool
+isYearLeap year = case year `mod` 4 of
+    0   -> case year `mod` 100 of
+        0   -> case year `mod` 400 of 
+            0   -> True
+            _   -> False
+        _   -> True
+    _   -> False
+
+getMntDays mntNum yLeap = case yLeap of
+    False   -> mntMappingReg !! (mntNum - 1)
+    True    -> mntMappingLeap !! (mntNum - 1)
+
+convertTsToSecondsDelta :: Maybe TimeStampObj -> Maybe TimeStampObj -> Int
+--convertTsToSeconds (TS yr mt dy hr mn sc (TZO tzsn tzhr tzmin)) = Prelude.undefined 
+convertTsToSecondsDelta _ Nothing = 0
+convertTsToSecondsDelta Nothing _ = 0
+convertTsToSecondsDelta (Just ts) (Just baseTs) = yr - yr0 where
+    (TS yr mt dy hr mn sc (TZO tzsn tzhr tzmin)) = ts
+    (TS yr0 mt0 dy0 hr0 mn0 sc0 (TZO tzsn0 tzhr0 tzmin0)) = baseTs
+
+secondsCumulativeToTheYear :: Int -> Int
+secondsCumulativeToTheYear y = Data.Foldable.foldl (\acc x -> ((+ acc) (secondsInOneYear x))) 0 [0..y - 1]
+
+secondsCumulativeToTheMonth :: Int -> Bool -> Int
+secondsCumulativeToTheMonth m bLeap = Data.Foldable.foldl (\acc x-> ((+ acc) (secondsInOneMonth x bLeap))) 0 [1..m - 1]
+
+-- secondsCumulativeToTheDay :: Int -> Int
+-- secondsCumulativeToTheDay d = secondsInOneDay * (d - 1)
+
+-- secondsCumulativeToTheHour :: Int -> Int
+-- secondsCumulativeToTheHour h = secondsInOneHour * (h - 1)
+
+secondsCumulativeToTheThing :: Int -> Int -> Int
+secondsCumulativeToTheThing f nr = f * (nr - 1)
+
+-- subtractTs :: Maybe TimeStampObj -> Maybe TimeStampObj -> Maybe TimeStampObj
+-- subtractTs ts0 ts1 = Just $ TS dYear dMonth dDay dHour dMin dSec off where
+--     (TS yr0 mt0 dy0 hr0 mn0 sc0 (TZO tzsn0 tzhr0 tzmin0)) = ts0
+--     (TS yr1 mt1 dy1 hr1 mn1 sc1 (TZO tzsn1 tzhr1 tzmin1)) = ts1
+--     dYear = yr1 - yr0
+--     dMonth = let dm = mt1 - mt0 in 
+--         case dm >= 0 of 
+--             True    -> dm
+--             False   -> 12 + dm
+--     dDay = let dd = dy1 - dy0 in 
+--         case dd >= 0 of 
+--             True    -> dd
+--             False   -> dy1 + ()
+
+convertTsToAbsSeconds :: Maybe TimeStampObj -> Int
+convertTsToAbsSeconds Nothing = 0
+convertTsToAbsSeconds (Just ts) = 
+      secondsCumulativeToTheYear year
+    + secondsCumulativeToTheMonth month (isYearLeap year)
+    + secondsCumulativeToTheThing secondsInOneDay day
+    + secondsCumulativeToTheThing secondsInOneHour hour
+    + secondsCumulativeToTheThing secondsInOneMin min
+    + sec 
+        where
+            (TS year month day hour min sec (TZO tzsn0 tzhr0 tzmin0)) = ts
+
+-- "2021-11-10 13:18:33 -0500"
+readTimeStamp :: String -> Maybe TimeStampObj
+readTimeStamp s = case parse parseTimeStamp2 s of
+    Just (tsobj, "")    -> Just tsobj
+    _                   -> Nothing 
+
+parseTimeStamp2 :: Parser TimeStampObj
+parseTimeStamp2 = do
+    year <- natNumber
+    char '-'
+    mont <- natNumber
+    char '-'
+    day <- natNumber
+    char ' '
+    hh <- natNumber
+    char ':'
+    mm <- natNumber
+    char ':'
+    ss <- natNumber
+    -- char ' '
+    -- item 
+    tzoff <- parseTzOffset
+    return $ TS year mont day hh mm ss $ tzoff
+
+parseTzOffset :: Parser TZOffset
+parseTzOffset = do 
+    char ' '
+    sign <- sat (`elem` ['+', '-'])
+    h1 <- digit
+    h2 <- digit
+    m1 <- digit
+    m2 <- digit
+    return $ TZO sign (read [h1, h2]::Hour) (read [m1, m2]::Min)
+
+
+natNumber :: Parser Int
+natNumber = do 
+  ds <- oneOrMore digit
+  return $ read ds
+
+
 
 getNodeContent :: [Node] -> String
 getNodeContent [] = "gnc_null"
