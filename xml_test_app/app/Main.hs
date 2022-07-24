@@ -71,16 +71,25 @@ main = do
     -- readFile will throw any parse errors as runtime exceptions
     Document prologue root epilogue <- readFile def "src_data/route_example.gpx"
     Document proFull rootFull epiFull <- readFile def "src_data/apple_health_export/workout-routes/route_2020-07-11_8.04pm.gpx"
-    Document prologueHData rootHData epilogueHData <- readFile def  "src_data/healthdata_example.xml" -- "src_data/healthdata_example.xml" -- "src_data/apple_health_export/export.xml"
-    --let resultingValues = procMain root
-    let resultingValues = procMain'' root
+    Document prologueHData rootHData epilogueHData <- readFile def  "src_data/apple_health_export/export.xml" -- "src_data/healthdata_example.xml" -- "src_data/apple_health_export/export.xml"
+    -- xxx let resultingValues = procMain root
+    
+    --let resultingValues = procMain'' root
     let resultHealthData = procHealthData rootHData
 
-    -- putStrLn $ Data.List.unlines $ Data.List.map showDataLine resultingValues
-    putStrLn $ Data.List.unlines $ Data.List.map show resultingValues
+    -- xxx putStrLn $ Data.List.unlines $ Data.List.map showDataLine resultingValues
+
+    --putStrLn $ Data.List.unlines $ Data.List.map show resultingValues
     putStrLn $ Data.List.unlines $ Data.List.map show resultHealthData
-    appendFile "export/testfile.txt" "33333------essss\n"
+    appendFile "export/hrm_data_00.txt" $ Data.List.unlines $ Data.List.map show resultHealthData
+    let hdWithSeconds = processTimeStampsHD resultHealthData $ getHDoffset $ Data.List.head(resultHealthData)
+    putStrLn $ Data.List.unlines $ Data.List.map prnHDline hdWithSeconds
+    --appendFile "export/testfile.txt" "33333------essss\n"
+    appendFile "export/hrm_data_01.txt" $ Data.List.unlines $ Data.List.map prnHDline hdWithSeconds
     return () -- (resultingValues)
+
+prnHDline :: (Int, Float) -> String
+prnHDline (time, value) = printf "%d, %f" time value
 
 showDataLine :: ValuePoint -> String
 showDataLine (ValuePoint name value) = printf "%7s = %s" name value
@@ -500,6 +509,13 @@ procHealthData rootElement = dataResult
     where
         (_, dataResult) = procElemHD rootElement []
 
--- map with ints as keys and strings as values
-myMap :: M.Map Int String
-myMap = M.fromList [(5,"a"), (3,"b"), (5, "c")]
+getHDoffset :: DataPoint -> Int
+getHDoffset (HD _ ts _) = convertTsToAbsSeconds $ readTimeStamp ts
+getHDoffset _           = 0
+
+processTimeStampsHD :: [DataPoint] -> Int -> [(Int, Float)]
+-- HD RecordType TimeStamp Value
+processTimeStampsHD [] _ = []
+processTimeStampsHD (dp:dps) offset = ((convertTsToAbsSeconds $ readTimeStamp ts) - offset, read value :: Float):processTimeStampsHD dps offset
+    where
+        (HD recType ts value) = dp
