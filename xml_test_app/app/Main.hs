@@ -17,6 +17,7 @@ import              Data.String
 import              Data.List.Split         -- splitOn
 import              Parsing
 
+
 -- import qualified Data.Map.Strict as Map
 -- import Data.Map (Map())
 
@@ -82,14 +83,18 @@ main = do
     --putStrLn $ Data.List.unlines $ Data.List.map show resultingValues
     putStrLn $ Data.List.unlines $ Data.List.map show resultHealthData
     appendFile "export/hrm_data_00.txt" $ Data.List.unlines $ Data.List.map show resultHealthData
-    let hdWithSeconds = processTimeStampsHD resultHealthData $ getHDoffset $ Data.List.head(resultHealthData)
-    putStrLn $ Data.List.unlines $ Data.List.map prnHDline hdWithSeconds
+    let hdWithSeconds = processTimeStampsHD_dbg resultHealthData $ getHDoffset $ Data.List.head(resultHealthData)
+    putStrLn $ "offset for " ++ show(Data.List.head(resultHealthData)) ++ ": " ++ show(getHDoffset $ Data.List.head(resultHealthData))
+    --putStrLn $ Data.List.unlines $ Data.List.map prnHDline hdWithSeconds
     --appendFile "export/testfile.txt" "33333------essss\n"
-    appendFile "export/hrm_data_01.txt" $ Data.List.unlines $ Data.List.map prnHDline hdWithSeconds
+    appendFile "export/hrm_data_03_fullWithDebug.txt" $ Data.List.unlines $ Data.List.map prnHDline_dbg hdWithSeconds
     return () -- (resultingValues)
 
 prnHDline :: (Int, Float) -> String
 prnHDline (time, value) = printf "%d, %f" time value
+prnHDline_dbg:: (String, Int, Float) -> String
+prnHDline_dbg (ts, time, value) = printf "%s, %d, %f" ts time value
+
 
 showDataLine :: ValuePoint -> String
 showDataLine (ValuePoint name value) = printf "%7s = %s" name value
@@ -517,5 +522,12 @@ processTimeStampsHD :: [DataPoint] -> Int -> [(Int, Float)]
 -- HD RecordType TimeStamp Value
 processTimeStampsHD [] _ = []
 processTimeStampsHD (dp:dps) offset = ((convertTsToAbsSeconds $ readTimeStamp ts) - offset, read value :: Float):processTimeStampsHD dps offset
+    where
+        (HD recType ts value) = dp
+
+processTimeStampsHD_dbg :: [DataPoint] -> Int -> [(String, Int, Float)]
+-- HD RecordType TimeStamp Value
+processTimeStampsHD_dbg [] _ = []
+processTimeStampsHD_dbg (dp:dps) offset = (ts, (convertTsToAbsSeconds $ readTimeStamp ts) - offset, read value :: Float):processTimeStampsHD_dbg dps offset
     where
         (HD recType ts value) = dp
