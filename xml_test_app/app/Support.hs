@@ -30,19 +30,12 @@ isPrefix [] _ = True
 isPrefix (_:_) [] = False
 isPrefix (x:xs) (y:ys) = x == y && isPrefix xs ys
 
-splitAtSub :: String -> String -> (String, String)
-splitAtSub [] ys = ([], ys)
-splitAtSub xs [] = ([], [])
-splitAtSub xs ys
-    | isPrefix xs ys = ([], drop (length xs) ys)
-    | otherwise = ([], [])
-
-isSubStringMore :: String -> String -> (String, Bool, String)
-isSubStringMore [] [] = ([], False, [])
-isSubStringMore xs [] = (xs, False, [])
-isSubStringMore xs ys
+splitAtSubstring :: String -> String -> (String, Bool, String)
+splitAtSubstring [] [] = ([], False, [])
+splitAtSubstring xs [] = (xs, False, [])
+splitAtSubstring xs ys
     | isPrefix xs ys = ([], True, drop (length xs) ys)
     | b = (head(ys):a, True, c)
-    | otherwise = ([], False, [])
+    | otherwise = ([], False, ys)
     where
-        (a, b, c) = isSubStringMore xs (tail ys)
+        (a, b, c) = splitAtSubstring xs (tail ys)
