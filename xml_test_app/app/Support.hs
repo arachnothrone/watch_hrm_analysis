@@ -3,6 +3,7 @@
 --
 import System.IO
 import Data.Char(toUpper)
+import Data.Maybe
 
 main :: IO()
 main = do
@@ -39,3 +40,28 @@ splitAtSubstring xs ys
     | otherwise = ([], False, ys)
     where
         (a, b, c) = splitAtSubstring xs (tail ys)
+
+getParamValue :: String -> String -> Maybe String
+getParamValue parameter line
+    | parExists == True = Just $ unquote rhs
+    | otherwise = Nothing
+    where
+        (_, parExists, rhs) = splitAtSubstring parameter line
+
+unquote :: String -> String
+unquote inStr
+    | exist1 && exist2 = lhs2
+    | otherwise = ""
+    where
+        (_, exist1, rhs1) = splitAtChar '\"' inStr
+        (lhs2, exist2, _) = splitAtChar '\"' rhs1
+
+splitAtChar :: Char -> String -> (String, Bool, String)
+splitAtChar _ [] = ([], False, [])
+splitAtChar c inStr 
+    | c == head inStr   = ([], True, drop 1 inStr)
+    | exist             = (head(inStr):lhs, True, rhs)
+    | otherwise         = ([], False, inStr)
+    where
+        (lhs, exist, rhs) = splitAtChar c (tail inStr)
+
