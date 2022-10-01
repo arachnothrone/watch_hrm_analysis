@@ -9,15 +9,31 @@ main :: IO()
 main = do
     -- inHndlr <- openFile "src_data/apple_health_export/export.xml" ReadMode  
     inHndlr <- openFile "src_data/healthdata_example.xml" ReadMode
-    outHndlr <- openFile "output.txt" AppendMode -- WriteMode
+    outHndlr <- openFile "output_new.txt" AppendMode -- WriteMode
     inputStr <- hGetContents inHndlr
-    hPutStr outHndlr (map toUpper inputStr)
+    -- putStrLn inputStr
+    hPutStr $ modifier inputStr
+    -- hPutStr outHndlr (map toUpper inputStr)
+    --hPutStr outHndlr (modifier inputStr)
     hClose inHndlr
     hClose outHndlr
+    putStrLn "--> end"
 
 modifier :: String -> String
 modifier s
-    | isPrefix "<Record" s = undefined
+    | isPrefix "<Record" s = case parameter_type of 
+        "HKQuantityTypeIdentifierHeartRate"    -> parameter_startDate ++ ',':parameter_endDate ++ ',':parameter_value
+        _                                      -> ".. "
+    | otherwise = ""
+    where
+        parameter_type = unwrapMaybe $ getParamValue "type" s 
+        parameter_startDate = unwrapMaybe $ getParamValue "startDate" s 
+        parameter_endDate = unwrapMaybe $ getParamValue "endDate" s 
+        parameter_value = unwrapMaybe $ getParamValue "value" s 
+
+unwrapMaybe :: Maybe String -> String
+unwrapMaybe (Just s) = s 
+unwrapMaybe Nothing = "" 
 
 isSubString :: String -> String -> Bool
 isSubString (_:_) [] = False
