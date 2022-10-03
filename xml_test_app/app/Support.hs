@@ -7,24 +7,17 @@ import Data.Maybe
 
 main :: IO()
 main = do
-    inHndlr <- openFile "src_data/apple_health_export/export.xml" ReadMode  
-    --inHndlr <- openFile "src_data/healthdata_example.xml" ReadMode
+    --inHndlr <- openFile "src_data/apple_health_export/export.xml" ReadMode  
+    inHndlr <- openFile "src_data/healthdata_example.xml" ReadMode
     outHndlr <- openFile "output_new.txt" AppendMode -- WriteMode
     hSetBuffering inHndlr LineBuffering
-    inputStr <- hGetContents inHndlr
-    --inputStr <- hGetLine inHndlr
-    -- let modstr = modif2 inputStr
-    -- hPutStr stdout modstr
-    -- inputStr2 <- hGetLine inHndlr
-    -- hPutStr stdout (modif2 inputStr2)
     
-    hPutStr stdout (unlines . map modifier . lines $ inputStr)
-    --print . unlines . map modifier . lines $ inputStr
-
-    -- print . modifier $ inputStr
-    --hPutStr outHndlr (modifier inputStr)
+    -- no explicit loop
+    -- inputStr <- hGetContents inHndlr
+    -- hPutStr stdout (unlines . map modifier . lines $ inputStr)
     
-    -- mainLoop inHndlr stdout
+    -- with explicit loop
+    mainLoop inHndlr stdout
 
     hClose inHndlr
     hClose outHndlr
