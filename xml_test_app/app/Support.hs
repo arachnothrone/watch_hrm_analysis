@@ -7,29 +7,51 @@ import Data.Maybe
 
 main :: IO()
 main = do
-    -- inHndlr <- openFile "src_data/apple_health_export/export.xml" ReadMode  
-    inHndlr <- openFile "src_data/healthdata_example.xml" ReadMode
+    inHndlr <- openFile "src_data/apple_health_export/export.xml" ReadMode  
+    --inHndlr <- openFile "src_data/healthdata_example.xml" ReadMode
     outHndlr <- openFile "output_new.txt" AppendMode -- WriteMode
+    hSetBuffering inHndlr LineBuffering
     inputStr <- hGetContents inHndlr
-    -- putStrLn inputStr
-    hPutStr $ modifier inputStr
-    -- hPutStr outHndlr (map toUpper inputStr)
+    --inputStr <- hGetLine inHndlr
+    -- let modstr = modif2 inputStr
+    -- hPutStr stdout modstr
+    -- inputStr2 <- hGetLine inHndlr
+    -- hPutStr stdout (modif2 inputStr2)
+    
+    hPutStr stdout (unlines . map modifier . lines $ inputStr)
+    --print . unlines . map modifier . lines $ inputStr
+
+    -- print . modifier $ inputStr
     --hPutStr outHndlr (modifier inputStr)
+    
+    -- mainLoop inHndlr stdout
+
     hClose inHndlr
     hClose outHndlr
     putStrLn "--> end"
 
+mainLoop :: Handle -> Handle -> IO()
+mainLoop inh outh = do
+    ineof <- hIsEOF inh
+    if ineof
+        then return()
+        else do
+            inpStr <- hGetLine inh 
+            hPutStr outh (modifier inpStr)
+            mainLoop inh outh
+
 modifier :: String -> String
 modifier s
-    | isPrefix "<Record" s = case parameter_type of 
-        "HKQuantityTypeIdentifierHeartRate"    -> parameter_startDate ++ ',':parameter_endDate ++ ',':parameter_value
-        _                                      -> ".. "
+    | exist = case parameter_type of 
+        "HKQuantityTypeIdentifierHeartRate"    -> parameter_startDate ++ ',':parameter_endDate ++ ',':parameter_value ++ "\n"
+        _                                      -> ""
     | otherwise = ""
     where
-        parameter_type = unwrapMaybe $ getParamValue "type" s 
-        parameter_startDate = unwrapMaybe $ getParamValue "startDate" s 
-        parameter_endDate = unwrapMaybe $ getParamValue "endDate" s 
-        parameter_value = unwrapMaybe $ getParamValue "value" s 
+        (_, exist, rhs) = splitAtSubstring "Record" s 
+        parameter_type = unwrapMaybe $ getParamValue "type" rhs
+        parameter_startDate = unwrapMaybe $ getParamValue "startDate" rhs 
+        parameter_endDate = unwrapMaybe $ getParamValue "endDate" rhs 
+        parameter_value = unwrapMaybe $ getParamValue "value" rhs 
 
 unwrapMaybe :: Maybe String -> String
 unwrapMaybe (Just s) = s 
@@ -80,4 +102,3 @@ splitAtChar c inStr
     | otherwise         = ([], False, inStr)
     where
         (lhs, exist, rhs) = splitAtChar c (tail inStr)
-
