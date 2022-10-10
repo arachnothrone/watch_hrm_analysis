@@ -17,7 +17,7 @@ import              Data.String
 import              Data.List.Split         -- splitOn
 import              Parsing
 
-
+import      Support
 -- import qualified Data.Map.Strict as Map
 -- import Data.Map (Map())
 
@@ -68,7 +68,8 @@ type TzSign     = Char
 main :: IO ()
 -- main :: IO [DataPoint]
 --main :: IO [ValuePoint]
-main = do
+main = main2
+main' = do
     -- readFile will throw any parse errors as runtime exceptions
     Document prologue root epilogue <- readFile def "src_data/route_example.gpx"
     Document proFull rootFull epiFull <- readFile def "src_data/apple_health_export/workout-routes/route_2020-07-11_8.04pm.gpx"
