@@ -52,7 +52,7 @@ unwrapMaybe Nothing = ""
 
 getParamValue :: String -> String -> Maybe String
 getParamValue parameter line
-    | parExists == True = Just $ unquote rhs
+    | parExists == True = Just $ unquote '\"' rhs
     | otherwise = Nothing
     where
         (_, parExists, rhs) = splitAtSubstring parameter line
