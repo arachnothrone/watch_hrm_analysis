@@ -5,6 +5,7 @@ Timestamp parsing and operations
 module TimeParsOp where
 
 import Parsing
+import StringOp
 import Text.Printf
 
 
@@ -42,6 +43,33 @@ readTimeStamp :: String -> Maybe TimeStampObj
 readTimeStamp s = case parse parseTimeStamp2 s of
     Just (tsobj, "")    -> Just tsobj
     _                   -> Nothing 
+
+readTimeStamp3 :: String -> Maybe TimeStampObj
+readTimeStamp3 s 
+    | exist1 && exist2 = Just $ TS (read year) (read month) (read day) (read hour) (read min) (read sec) (TZO sgn (read [h1, h2]::Hour) (read [m1, m2]::Min)) 
+    | otherwise = Nothing
+    where
+        (dateString, exist1, rhs) = splitAtChar ' ' s
+        (year, month, day) = getDate dateString
+        (timeString, exist2, offsetString) = splitAtChar ' ' rhs
+        (hour, min, sec) = getTime timeString
+        (sgn:h1:h2:m1:m2:_) = offsetString
+
+getDate :: String -> (String, String, String)
+getDate s
+    | existY && existM = (year, month, day)
+    | otherwise = ("", "", "")
+    where
+        (year, existY, rhs) = splitAtChar '-' s
+        (month, existM, day) = splitAtChar '-' rhs
+
+getTime :: String -> (String, String, String)
+getTime s
+    | existH && existM = (hour, min, sec)
+    | otherwise = ("", "", "")
+    where
+        (hour, existH, rhs) = splitAtChar ':' s
+        (min, existM, sec) = splitAtChar ':' rhs
 
 convertTsToAbsSeconds :: Maybe TimeStampObj -> Int
 convertTsToAbsSeconds Nothing = 0
