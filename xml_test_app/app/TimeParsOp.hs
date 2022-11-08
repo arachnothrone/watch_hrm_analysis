@@ -50,26 +50,18 @@ readTimeStamp3 s
     | otherwise = Nothing
     where
         (dateString, exist1, rhs) = splitAtChar ' ' s
-        (year, month, day) = getDate dateString
+        (year, month, day) = getDateTime dateString '-'
         (timeString, exist2, offsetString) = splitAtChar ' ' rhs
-        (hour, min, sec) = getTime timeString
+        (hour, min, sec) = getDateTime timeString ':'
         (sgn:h1:h2:m1:m2:_) = offsetString
 
-getDate :: String -> (String, String, String)
-getDate s
-    | existY && existM = (year, month, day)
+getDateTime :: String -> Char -> (String, String, String)
+getDateTime s delimiter
+    | exist1 && exist2 = (value1, value2, value2)
     | otherwise = ("", "", "")
     where
-        (year, existY, rhs) = splitAtChar '-' s
-        (month, existM, day) = splitAtChar '-' rhs
-
-getTime :: String -> (String, String, String)
-getTime s
-    | existH && existM = (hour, min, sec)
-    | otherwise = ("", "", "")
-    where
-        (hour, existH, rhs) = splitAtChar ':' s
-        (min, existM, sec) = splitAtChar ':' rhs
+        (value1, exist1, rhs) = splitAtChar delimiter s
+        (value2, exist2, value3) = splitAtChar delimiter rhs
 
 convertTsToAbsSeconds :: Maybe TimeStampObj -> Int
 convertTsToAbsSeconds Nothing = 0

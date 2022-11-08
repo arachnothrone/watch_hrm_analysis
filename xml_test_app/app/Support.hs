@@ -9,9 +9,9 @@ import TimeParsOp
 main2 :: IO()
 main2 = do
     -- inHndlr <- openFile "src_data/apple_health_export/export.xml" ReadMode  
-    -- inHndlr <- openFile "src_data/healthdata_example.xml" ReadMode
-    inHndlr <- openFile "../../src_data/healthdata_example.xml" ReadMode
-    -- inHndlr <- openFile "../../src_data/apple_health_export/export.xml" ReadMode  
+    inHndlr <- openFile "src_data/healthdata_example.xml" ReadMode
+    --inHndlr <- openFile "../../src_data/healthdata_example.xml" ReadMode
+    --inHndlr <- openFile "../../src_data/apple_health_export/export.xml" ReadMode  
     outHndlr <- openFile "output_new.txt" AppendMode -- WriteMode
     hSetBuffering inHndlr LineBuffering
     
@@ -20,7 +20,7 @@ main2 = do
     -- hPutStr stdout (unlines . map modifier . lines $ inputStr)
     
     -- with explicit loop
-    mainLoop inHndlr stdout
+    mainLoop inHndlr outHndlr
 
     hClose inHndlr
     hClose outHndlr
